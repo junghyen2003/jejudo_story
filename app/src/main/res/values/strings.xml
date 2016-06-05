@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">jejurizmandroid</string>
+
+    <string name="activity_camera_progress">잠시만 기다리세요...</string>
+</resources>
