@@ -1,0 +1,564 @@
+package com.namooplus.jejurizmandroid.ui;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Rect;
+import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.media.ExifInterface;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.widget.ImageButton;
+import android.widget.Toast;
+
+import com.commonsware.cwac.camera.CameraHost;
+import com.commonsware.cwac.camera.CameraHostProvider;
+import com.commonsware.cwac.camera.CameraUtils;
+import com.commonsware.cwac.camera.CameraView;
+import com.commonsware.cwac.camera.PictureTransaction;
+import com.commonsware.cwac.camera.SimpleCameraHost;
+import com.namooplus.jejurizmandroid.R;
+import com.namooplus.jejurizmandroid.common.CameraConfig;
+import com.namooplus.jejurizmandroid.common.Utils;
+import com.namooplus.jejurizmandroid.view.DrawingView;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+/**
+ * Created by HeungSun-AndBut on 2016. 6. 5..
+ */
+
+public class CameraActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, CameraHostProvider {
+
+    static final int FOCUS_AREA_WEIGHT = 1000;
+
+    private static final Interpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
+    private static final Interpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
+
+    private CameraView mCameraView;
+    private ImageButton mBtnTakePicture;
+    private View mVShutter;
+    private DrawingView mDvDrawingView;
+    private List<Camera.Area> mFocusList;
+
+    private ProgressDialog mProgressDialog;
+    //화면 방향
+    private int mDeviceOrientation;
+
+    private int mCameraWidth;
+    private int mCameraHeight;
+
+    public static MyCameraHost mMyCameraHost;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mMyCameraHost = new MyCameraHost(this);
+
+        setContentView(R.layout.activity_camera);
+
+        mCameraView = (CameraView) findViewById(R.id.activity_camera_cameraview);
+        mBtnTakePicture = (ImageButton) findViewById(R.id.activity_camera_take_button);
+        mVShutter = findViewById(R.id.activity_camera_shutter);
+        mDvDrawingView  = (DrawingView) findViewById(R.id.activity_camera_drawingview);
+
+        mBtnTakePicture.setOnClickListener(this);
+        mCameraView.setOnTouchListener(this);
+
+
+
+
+        //ViewGroup.LayoutParams params = mCameraView.getLayoutParams();
+        //params.height= (int) getResources().getDimension(mConfig.getCameraHeight());
+
+        //mCameraView.setLayoutParams(params);
+
+
+        // 카메라뷰의 크기와 위치를 가져온다
+        // get CameraView's widht/height
+        mCameraView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mCameraView.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                mCameraWidth = mCameraView.getWidth();
+                mCameraHeight = mCameraView.getHeight();
+
+                return true;
+            }
+        });
+
+        //방향전환 감지
+        addSensorListener();
+
+    }
+
+    //화면 포커스 맞추기
+    private void focusOnTouch(MotionEvent event) {
+
+        float x = event.getX();
+        float y = event.getY();
+
+        Rect touchRect = new Rect(
+                (int) (x - 100),
+                (int) (y - 100),
+                (int) (x + 100),
+                (int) (y + 100));
+
+        Rect cameraViewRect = new Rect();
+        mCameraView.getLocalVisibleRect(cameraViewRect);
+
+
+        // 사각형 범위가 카메라뷰 위치를 벗어나는경우 카메라뷰의 최대 위치로 보정한다
+        // calculate right range
+
+        if (touchRect.left < cameraViewRect.left) {
+            touchRect.left = cameraViewRect.left;
+        }
+
+
+        if (touchRect.right > cameraViewRect.right) {
+            touchRect.right = cameraViewRect.right;
+        }
+
+        if (touchRect.top < cameraViewRect.top) {
+            touchRect.top = cameraViewRect.top;
+        }
+
+        if (touchRect.bottom > cameraViewRect.bottom) {
+            touchRect.bottom = cameraViewRect.bottom;
+        }
+
+
+        final Rect targetFocusRect = new Rect(
+                touchRect.left * 2000 / mCameraView.getWidth() - FOCUS_AREA_WEIGHT,
+                touchRect.top * 2000 / mCameraView.getHeight() - FOCUS_AREA_WEIGHT,
+                touchRect.right * 2000 / mCameraView.getWidth() - FOCUS_AREA_WEIGHT,
+                touchRect.bottom * 2000 / mCameraView.getHeight() - FOCUS_AREA_WEIGHT);
+
+
+        doTouchFocus(targetFocusRect);
+
+
+        // 사각형의 화면 뷰를 1초간 보여주었다가 없앤다
+        // Remove the square indicator after 1000 msec
+        mDvDrawingView.setHaveTouch(true, touchRect);
+        mDvDrawingView.invalidate();
+
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                mDvDrawingView.setHaveTouch(false, new Rect(0, 0, 0, 0));
+                mDvDrawingView.invalidate();
+            }
+        }, 1000);
+
+
+    }
+    private void addSensorListener() {
+
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorManager.registerListener(new SensorEventListener() {
+
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+
+                float x = event.values[0];
+                float y = event.values[1];
+
+                if (x<5 && x>-5 && y > 5)
+                    mDeviceOrientation = 0;
+                else if (x<-5 && y<5 && y>-5)
+                    mDeviceOrientation = 90;
+                else if (x<5 && x>-5 && y<-5)
+                    mDeviceOrientation = 180;
+                else if (x>5 && y<5 && y>-5)
+                    mDeviceOrientation = 270;
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                // TODO Auto-generated method stub
+
+            }
+        }, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
+    }
+
+    public void doTouchFocus(Rect tfocusRect) {
+        try {
+
+            // Area 리스트에 넣고 포커스를 잡는다
+            mFocusList = new ArrayList<Camera.Area>();
+            Camera.Area focusArea = new Camera.Area(tfocusRect, FOCUS_AREA_WEIGHT);
+            mFocusList.add(focusArea);
+
+
+            mCameraView.autoFocus();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        mCameraView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mCameraView.onPause();
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.activity_camera_take_button:
+                onTakePicture(v);
+                break;
+        }
+    }
+
+    public void showTakenPicture(Uri uri) {
+        setProgress(false);
+        Toast.makeText(CameraActivity.this, "이미지를 보여주기 만들어야징 : "+uri.toString(),Toast.LENGTH_SHORT).show();
+    }
+
+    private void takePicture() {
+        try {
+            mCameraView.takePicture(false, true);
+            mBtnTakePicture.setEnabled(false);
+            animateShutter();
+        } catch (IllegalStateException ex) {
+            Toast.makeText(CameraActivity.this, "사진찍기 에러 : " + ex.toString(), Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+    public void onTakePicture(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                && mFocusList == null
+                ) {
+            mCameraView.autoFocus();
+        } else {
+            takePicture();
+        }
+
+    }
+
+    private void setProgress(boolean show) {
+        if(show) {
+            if (mProgressDialog == null) {
+                mProgressDialog = new ProgressDialog(CameraActivity.this);
+                mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
+                mProgressDialog.setIndeterminate(true);
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();
+            } else if(!mProgressDialog.isShowing()) {
+                mProgressDialog.show();
+            }
+        } else {
+            if(mProgressDialog != null && mProgressDialog.isShowing()) {
+                mProgressDialog.dismiss();
+            }
+        }
+
+    }
+
+    private void animateShutter() {
+        mVShutter.setVisibility(View.VISIBLE);
+        mVShutter.setAlpha(0.f);
+
+        ObjectAnimator alphaInAnim = ObjectAnimator.ofFloat(mVShutter, "alpha", 0f, 0.8f);
+        alphaInAnim.setDuration(100);
+        alphaInAnim.setStartDelay(100);
+        alphaInAnim.setInterpolator(ACCELERATE_INTERPOLATOR);
+
+        ObjectAnimator alphaOutAnim = ObjectAnimator.ofFloat(mVShutter, "alpha", 0.8f, 0f);
+        alphaOutAnim.setDuration(200);
+        alphaOutAnim.setInterpolator(DECELERATE_INTERPOLATOR);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playSequentially(alphaInAnim, alphaOutAnim);
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mVShutter.setVisibility(View.GONE);
+                setProgress(true);
+            }
+        });
+        animatorSet.start();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (v.getId()) {
+            case R.id.activity_camera_cameraview :
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        focusOnTouch(event);
+                    }
+                }
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public CameraHost getCameraHost() {
+        return mMyCameraHost;
+    }
+
+    class MyCameraHost extends SimpleCameraHost {
+
+        final double SIZE_MULTIPLE = 1.5;
+        Activity activity;
+        Camera.Size bestPictureSize;
+
+        public MyCameraHost(Activity activity) {
+            super(activity);
+            this.activity = activity;
+        }
+
+        @Override
+        protected File getPhotoDirectory() {
+            return new File(CameraConfig.SAVE_IMAGE_PATH);
+        }
+
+        @Override
+        public boolean useFullBleedPreview() {
+            return true;
+        }
+
+
+        // 미리보기 화면에서 사진 크기 해상도를 미리 가져온다
+        @Override
+        public Camera.Parameters adjustPreviewParameters(Camera.Parameters parameters) {
+            bestPictureSize = getBestPictureSize(parameters);
+            return super.adjustPreviewParameters(parameters);
+        }
+
+        @Override
+        public Camera.Size getPictureSize(PictureTransaction xact, Camera.Parameters parameters) {
+
+
+            //   return super.getPictureSize(xact, parameters);
+            if (bestPictureSize == null) {
+                bestPictureSize = getBestPictureSize(parameters);
+            }
+
+            return bestPictureSize;
+
+        }
+
+        private Camera.Size getBestPictureSize(Camera.Parameters parameters) {
+            Camera.Size result;
+
+            if (mCameraWidth == 0) {
+                return CameraUtils.getLargestPictureSize(this, parameters, false);
+            }
+            List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
+
+            Collections.sort(sizes,
+                    Collections.reverseOrder(new SizeComparator()));
+            result = sizes.get(sizes.size() - 1);
+
+            for (Camera.Size entry : sizes) {
+
+                if (entry.height >= mCameraWidth * SIZE_MULTIPLE && entry.width >= mCameraHeight * SIZE_MULTIPLE) {
+                    result = entry;
+                } else {
+                    break;
+                }
+
+
+            }
+            return result;
+
+        }
+
+        private Bitmap getCorrectOrientImage(Bitmap bitmap) {
+            bitmap = Utils.rotate(bitmap, mDeviceOrientation);
+            return bitmap;
+        }
+        private Bitmap getCorrectOrientImage(Bitmap bitmap, String path) {
+
+            ExifInterface exif = null;
+            try {
+
+                exif = new ExifInterface(path);
+
+                if (exif != null) {
+                    int exifOrientation = exif.getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                    int exifDegree = Utils.exifOrientationToDegrees(exifOrientation);
+                    bitmap = Utils.rotate(bitmap, exifDegree);
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return bitmap;
+
+
+        }
+
+
+        @Override
+        public Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters) {
+
+            if(CameraConfig.FLASH_SETTING_VALUE){
+                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+            }
+
+            return super.adjustPictureParameters(xact, parameters);
+        }
+
+        @Override
+        public void saveImage(PictureTransaction xact, byte[] image) {
+
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+
+            try {
+
+                final File photo = getPhotoPath();
+
+                if (photo.exists()) {
+                    photo.delete();
+                }
+
+
+                // 회전값을 보정한다
+                bitmap = Utils.rotate(bitmap, mDeviceOrientation);
+                //bitmap = getCorrectOrientImage(bitmap, photo.toString());
+                // bitmap = getCorrectOrientImage(bitmap, photo.toString());
+
+                float ratio = mCameraHeight / mCameraWidth;
+
+                Bitmap crop_bitmap = Utils.cropCenterBitmap(bitmap, bitmap.getWidth(), (int) (bitmap.getWidth() * ratio));
+                FileOutputStream fos;
+
+                fos = new FileOutputStream(photo);
+
+                crop_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+                fos.flush();
+                fos.close();
+
+
+                // 사진을 저장한뒤 미디어를 스캔해서 저장한 파일을 읽어온다
+                MediaScannerConnection.scanFile(activity, new String[]{photo.getPath()}, new String[]{"image/jpeg"}, new MediaScannerConnection.MediaScannerConnectionClient() {
+                    @Override
+                    public void onMediaScannerConnected() {
+
+                    }
+
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showTakenPicture(Uri.parse(photo.toString()));
+                            }
+                        });
+
+                    }
+                });
+
+
+            } catch (Exception e) {
+                handleException(e);
+
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onAutoFocus(boolean success, Camera camera) {
+            try {
+
+                // 터치해서 포커스 잡는 경우
+                if (mFocusList != null) {
+                    Camera.Parameters param = camera.getParameters();
+
+                    int maxNumFocusAreas = param.getMaxNumFocusAreas();
+                    int maxNumMeteringAreas = param.getMaxNumMeteringAreas();
+
+                    param.setFocusAreas(mFocusList);
+                    param.setMeteringAreas(mFocusList);
+
+                    camera.setParameters(param);
+                    super.onAutoFocus(success, camera);
+                }
+                // 아무터치하지않고 그냥 바로 촬영버튼 누른경우
+                else {
+                    //  super.onAutoFocus(success, camera);
+                    takePicture();
+                }
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+        }
+
+        private class SizeComparator implements
+                Comparator<Camera.Size> {
+            @Override
+            public int compare(Camera.Size lhs, Camera.Size rhs) {
+                int left = lhs.width * lhs.height;
+                int right = rhs.width * rhs.height;
+
+                if (left < right) {
+                    return (-1);
+                } else if (left > right) {
+                    return (1);
+                }
+
+                return (0);
+            }
+
+
+        }
+
+    }
+
+}
