@@ -10,10 +10,6 @@
 
     >
 
-
-    <!--android:layout_height="@dimen/post_detail_picture_viewpager"-->
-
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -55,5 +51,13 @@
         android:scaleType="fitCenter"
         android:src="@mipmap/ic_launcher" />
 
-
+    <TextView
+        android:id="@+id/activity_camera_location_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:textColor="#ffffff"
+        android:background="@color/colorAccent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

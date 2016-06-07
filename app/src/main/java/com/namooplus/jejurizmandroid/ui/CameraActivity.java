@@ -1,5 +1,6 @@
 package com.namooplus.jejurizmandroid.ui;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -7,6 +8,8 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -15,6 +18,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -23,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -30,6 +36,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.commonsware.cwac.camera.CameraHost;
@@ -40,6 +47,7 @@ import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.SimpleCameraHost;
 import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.common.CameraConfig;
+import com.namooplus.jejurizmandroid.common.GpsInfo;
 import com.namooplus.jejurizmandroid.common.Utils;
 import com.namooplus.jejurizmandroid.view.DrawingView;
 
@@ -54,18 +62,28 @@ import java.util.List;
  * Created by HeungSun-AndBut on 2016. 6. 5..
  */
 
-public class CameraActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, CameraHostProvider {
+public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
+        View.OnTouchListener, CameraHostProvider {
+
+    private static final String[] LOCATION_FINE_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION};
+    private static final int ACCESS_FINE_LOCATION = 3390;
 
     static final int FOCUS_AREA_WEIGHT = 1000;
+
+    private double mCurrentLat = 0; // 위도
+    private double mCurrentLon = 0; // 경도
+    private GpsInfo mGpsInfo;
 
     private static final Interpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
     private static final Interpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
 
     private CameraView mCameraView;
     private ImageButton mBtnTakePicture;
+    private TextView mTxLocation;
     private View mVShutter;
     private DrawingView mDvDrawingView;
     private List<Camera.Area> mFocusList;
+
 
     private ProgressDialog mProgressDialog;
     //화면 방향
@@ -75,6 +93,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private int mCameraHeight;
 
     public static MyCameraHost mMyCameraHost;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,22 +105,13 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mCameraView = (CameraView) findViewById(R.id.activity_camera_cameraview);
         mBtnTakePicture = (ImageButton) findViewById(R.id.activity_camera_take_button);
         mVShutter = findViewById(R.id.activity_camera_shutter);
-        mDvDrawingView  = (DrawingView) findViewById(R.id.activity_camera_drawingview);
+        mDvDrawingView = (DrawingView) findViewById(R.id.activity_camera_drawingview);
+        mTxLocation = (TextView) findViewById(R.id.activity_camera_location_info);
 
         mBtnTakePicture.setOnClickListener(this);
+        mTxLocation.setOnClickListener(this);
         mCameraView.setOnTouchListener(this);
 
-
-
-
-        //ViewGroup.LayoutParams params = mCameraView.getLayoutParams();
-        //params.height= (int) getResources().getDimension(mConfig.getCameraHeight());
-
-        //mCameraView.setLayoutParams(params);
-
-
-        // 카메라뷰의 크기와 위치를 가져온다
-        // get CameraView's widht/height
         mCameraView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
@@ -117,7 +127,78 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         //방향전환 감지
         addSensorListener();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && PackageManager.PERMISSION_GRANTED !=
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            requestPermissions(LOCATION_FINE_PERMISSION, ACCESS_FINE_LOCATION);
+
+        } else {
+            mGpsInfo = new GpsInfo(this, locationListener);
+            if (mGpsInfo.checkLocation()) {
+                mGpsInfo.initLocation();
+                mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+            } else {
+                Toast.makeText(this, getResources().getString(R.string.activity_camera_gps_fail),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
+
+    private LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            mCurrentLat = location.getLatitude();
+            mCurrentLon = location.getLongitude();
+            mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.i("HS","onStatusChanged");
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.i("HS","onProviderEnabled");
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.i("HS","onProviderDisabled");
+        }
+    };
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+        switch (requestCode) {
+            case RESULT_OK:
+                mGpsInfo = new GpsInfo(this, locationListener);
+                if (mGpsInfo.checkLocation()) {
+                    mGpsInfo.initLocation();
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case ACCESS_FINE_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    mGpsInfo = new GpsInfo(this, locationListener);
+                    if (mGpsInfo.checkLocation()) {
+                        mGpsInfo.initLocation();
+                    }
+                }
+                break;
+        }
+    }
+
 
     //화면 포커스 맞추기
     private void focusOnTouch(MotionEvent event) {
@@ -134,14 +215,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         Rect cameraViewRect = new Rect();
         mCameraView.getLocalVisibleRect(cameraViewRect);
 
-
         // 사각형 범위가 카메라뷰 위치를 벗어나는경우 카메라뷰의 최대 위치로 보정한다
-        // calculate right range
-
         if (touchRect.left < cameraViewRect.left) {
             touchRect.left = cameraViewRect.left;
         }
-
 
         if (touchRect.right > cameraViewRect.right) {
             touchRect.right = cameraViewRect.right;
@@ -184,6 +261,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
 
     }
+
     private void addSensorListener() {
 
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -195,13 +273,13 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 float x = event.values[0];
                 float y = event.values[1];
 
-                if (x<5 && x>-5 && y > 5)
+                if (x < 5 && x > -5 && y > 5)
                     mDeviceOrientation = 0;
-                else if (x<-5 && y<5 && y>-5)
+                else if (x < -5 && y < 5 && y > -5)
                     mDeviceOrientation = 90;
-                else if (x<5 && x>-5 && y<-5)
+                else if (x < 5 && x > -5 && y < -5)
                     mDeviceOrientation = 180;
-                else if (x>5 && y<5 && y>-5)
+                else if (x > 5 && y < 5 && y > -5)
                     mDeviceOrientation = 270;
             }
 
@@ -221,7 +299,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             Camera.Area focusArea = new Camera.Area(tfocusRect, FOCUS_AREA_WEIGHT);
             mFocusList.add(focusArea);
 
-
             mCameraView.autoFocus();
 
         } catch (Exception e) {
@@ -229,6 +306,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         }
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -253,7 +331,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     public void showTakenPicture(Uri uri) {
         setProgress(false);
-        Toast.makeText(CameraActivity.this, "이미지를 보여주기 만들어야징 : "+uri.toString(),Toast.LENGTH_SHORT).show();
+        Toast.makeText(CameraActivity.this, "이미지를 보여주기 만들어야징 : " + uri.toString(), Toast.LENGTH_SHORT).show();
     }
 
     private void takePicture() {
@@ -279,18 +357,18 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void setProgress(boolean show) {
-        if(show) {
+        if (show) {
             if (mProgressDialog == null) {
                 mProgressDialog = new ProgressDialog(CameraActivity.this);
                 mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
                 mProgressDialog.setIndeterminate(true);
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.show();
-            } else if(!mProgressDialog.isShowing()) {
+            } else if (!mProgressDialog.isShowing()) {
                 mProgressDialog.show();
             }
         } else {
-            if(mProgressDialog != null && mProgressDialog.isShowing()) {
+            if (mProgressDialog != null && mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
             }
         }
@@ -325,7 +403,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         switch (v.getId()) {
-            case R.id.activity_camera_cameraview :
+            case R.id.activity_camera_cameraview:
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         focusOnTouch(event);
@@ -361,7 +439,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         public boolean useFullBleedPreview() {
             return true;
         }
-
 
         // 미리보기 화면에서 사진 크기 해상도를 미리 가져온다
         @Override
@@ -413,6 +490,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             bitmap = Utils.rotate(bitmap, mDeviceOrientation);
             return bitmap;
         }
+
         private Bitmap getCorrectOrientImage(Bitmap bitmap, String path) {
 
             ExifInterface exif = null;
@@ -441,7 +519,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         public Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters) {
 
-            if(CameraConfig.FLASH_SETTING_VALUE){
+            if (CameraConfig.FLASH_SETTING_VALUE) {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
             }
 
