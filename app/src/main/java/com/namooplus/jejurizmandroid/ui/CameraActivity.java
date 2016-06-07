@@ -36,6 +36,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +48,7 @@ import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.SimpleCameraHost;
 import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.common.CameraConfig;
+import com.namooplus.jejurizmandroid.common.Compass;
 import com.namooplus.jejurizmandroid.common.GpsInfo;
 import com.namooplus.jejurizmandroid.common.Utils;
 import com.namooplus.jejurizmandroid.view.DrawingView;
@@ -94,6 +96,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     public static MyCameraHost mMyCameraHost;
 
+    private Compass compass;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,6 +110,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mVShutter = findViewById(R.id.activity_camera_shutter);
         mDvDrawingView = (DrawingView) findViewById(R.id.activity_camera_drawingview);
         mTxLocation = (TextView) findViewById(R.id.activity_camera_location_info);
+        compass = new Compass(this);
+        compass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
 
         mBtnTakePicture.setOnClickListener(this);
         mTxLocation.setOnClickListener(this);
@@ -123,6 +128,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 return true;
             }
         });
+
 
         //방향전환 감지
         addSensorListener();
@@ -142,6 +148,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
     }
+
 
     private LocationListener locationListener = new LocationListener() {
         @Override
@@ -308,19 +315,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mCameraView.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mCameraView.onPause();
-    }
-
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.activity_camera_take_button:
@@ -413,6 +407,33 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         }
         return true;
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        compass.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        compass.stop();
+        mCameraView.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        compass.start();
+        mCameraView.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        compass.stop();
+    }
+
 
     @Override
     public CameraHost getCameraHost() {

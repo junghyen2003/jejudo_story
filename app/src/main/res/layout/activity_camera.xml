@@ -60,4 +60,16 @@
         android:background="@color/colorAccent"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"/>
+
+    <ImageView
+        android:id="@+id/activity_camera_compass"
+        android:layout_width="20dp"
+        android:layout_height="50dp"
+        android:layout_margin="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:contentDescription="@string/activity_camera_compass"
+        android:scaleType="fitXY"
+        android:src="@drawable/compass" />
+
 </RelativeLayout>

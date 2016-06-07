@@ -9,4 +9,6 @@
     <string name="activity_camera_gps_no">취소</string>
     <string name="activity_camera_gps_fail">GPS 값을 가져 올 수 없습니다.</string>
     <string name="activity_camera_location_permission">"권한을 수락하셔야 합니다.</string>
+
+    <string name="activity_camera_compass">Compass Hands</string>
 </resources>
