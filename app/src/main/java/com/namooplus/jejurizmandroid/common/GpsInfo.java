@@ -44,7 +44,8 @@ public class GpsInfo {
         locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
 
         //GPS가 사용가능한지
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+                !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             showSettingsAlert();
             return false;
         } else {
@@ -52,26 +53,46 @@ public class GpsInfo {
         }
     }
 
-    public Location initLocation() {
+    public Location getLocation() {
         try {
             if (checkLocation()) {
+                // First get location from Network Provider
+                if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATES, MIN_DISTANCE_UPDATES,
+                            locationListener);
+                    Log.d("Network", "Network");
+                    if (locationManager != null) {
+                        location = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        if (location != null) {
+                            lat = location.getLatitude();
+                            lon = location.getLongitude();
+                        }
+                    }
+                }
+                // if GPS Enabled get lat/long using GPS Services
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     if (location == null) {
                         locationManager.requestLocationUpdates(
                                 LocationManager.GPS_PROVIDER, MIN_TIME_UPDATES, MIN_DISTANCE_UPDATES,
                                 locationListener);
-
+                        Log.d("GPS Enabled", "GPS Enabled");
                         if (locationManager != null) {
-                            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            location = locationManager
+                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                             if (location != null) {
                                 lat = location.getLatitude();
                                 lon = location.getLongitude();
                             }
+                        }
                     }
                 }
             }
         } catch (SecurityException e) {
-            Log.i("HS","SecurityException : " + e.getMessage());
+            Log.i("HS", "e : " + e.toString());
         }
+
         return location;
     }
 

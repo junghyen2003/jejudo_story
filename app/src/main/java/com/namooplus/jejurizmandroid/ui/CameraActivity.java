@@ -75,7 +75,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private double mCurrentLat = 0; // 위도
     private double mCurrentLon = 0; // 경도
     private GpsInfo mGpsInfo;
-
     private static final Interpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
     private static final Interpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
 
@@ -129,6 +128,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
+        mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
 
         //방향전환 감지
         addSensorListener();
@@ -140,15 +140,18 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         } else {
             mGpsInfo = new GpsInfo(this, locationListener);
             if (mGpsInfo.checkLocation()) {
-                mGpsInfo.initLocation();
-                mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+                Location  l = mGpsInfo.getLocation();
+                if(l != null) {
+                    mCurrentLat = l.getLatitude();
+                    mCurrentLon = l.getLatitude();
+                    mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+                }
             } else {
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_gps_fail),
                         Toast.LENGTH_SHORT).show();
             }
         }
     }
-
 
     private LocationListener locationListener = new LocationListener() {
         @Override
@@ -179,11 +182,11 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         super.startActivityForResult(intent, requestCode);
         switch (requestCode) {
             case RESULT_OK:
-                mGpsInfo = new GpsInfo(this, locationListener);
+                /*mGpsInfo = new GpsInfo(this, locationListener);
                 if (mGpsInfo.checkLocation()) {
                     mGpsInfo.initLocation();
                 }
-                break;
+                break;*/
         }
     }
 
@@ -197,10 +200,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                             Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    mGpsInfo = new GpsInfo(this, locationListener);
+                    /*mGpsInfo = new GpsInfo(this, locationListener);
                     if (mGpsInfo.checkLocation()) {
                         mGpsInfo.initLocation();
-                    }
+                    }*/
                 }
                 break;
         }
