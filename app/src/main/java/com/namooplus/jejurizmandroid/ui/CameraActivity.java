@@ -50,11 +50,13 @@ import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.common.CameraConfig;
 import com.namooplus.jejurizmandroid.common.Compass;
 import com.namooplus.jejurizmandroid.common.GpsInfo;
+import com.namooplus.jejurizmandroid.common.LightInfo;
 import com.namooplus.jejurizmandroid.common.Utils;
 import com.namooplus.jejurizmandroid.view.DrawingView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -74,7 +76,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     private double mCurrentLat = 0; // 위도
     private double mCurrentLon = 0; // 경도
-    private GpsInfo mGpsInfo;
+
     private static final Interpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
     private static final Interpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
 
@@ -82,6 +84,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private ImageButton mBtnTakePicture;
     private TextView mTxLocation;
     private View mVShutter;
+    private TextView mTxLight;
     private DrawingView mDvDrawingView;
     private List<Camera.Area> mFocusList;
 
@@ -95,7 +98,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     public static MyCameraHost mMyCameraHost;
 
-    private Compass compass;
+    private Compass mCompass;
+    private GpsInfo mGpsInfo;
+    private LightInfo mLightInfo;
+
+    private float mLightValue;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,8 +117,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mVShutter = findViewById(R.id.activity_camera_shutter);
         mDvDrawingView = (DrawingView) findViewById(R.id.activity_camera_drawingview);
         mTxLocation = (TextView) findViewById(R.id.activity_camera_location_info);
-        compass = new Compass(this);
-        compass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
+        mTxLight = (TextView) findViewById(R.id.activity_camera_light_info);
+        mCompass = new Compass(this);
+        mCompass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
 
         mBtnTakePicture.setOnClickListener(this);
         mTxLocation.setOnClickListener(this);
@@ -130,6 +139,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
 
+        mLightInfo = new LightInfo(this, lightSensorListener);
         //방향전환 감지
         addSensorListener();
 
@@ -139,20 +149,27 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         } else {
             mGpsInfo = new GpsInfo(this, locationListener);
-            if (mGpsInfo.checkLocation()) {
-                Location  l = mGpsInfo.getLocation();
-                if(l != null) {
-                    mCurrentLat = l.getLatitude();
-                    mCurrentLon = l.getLatitude();
-                    mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
-                }
-            } else {
-                Toast.makeText(this, getResources().getString(R.string.activity_camera_gps_fail),
-                        Toast.LENGTH_SHORT).show();
-            }
+            mGpsInfo.initLocation();
         }
     }
 
+    //조도 값 리스너
+    private SensorEventListener lightSensorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if(event.sensor.getType() == Sensor.TYPE_LIGHT){
+                mLightValue = event.values[0];
+                DecimalFormat format = new DecimalFormat(".##");
+                mTxLight.setText(format.format(mLightValue));
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
+    //위치 값 리스너
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
@@ -163,30 +180,30 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.i("HS","onStatusChanged");
+            Log.i("HS", "onStatusChanged");
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Log.i("HS","onProviderEnabled");
+            Log.i("HS", "onProviderEnabled");
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-            Log.i("HS","onProviderDisabled");
+            Log.i("HS", "onProviderDisabled");
         }
     };
+
+
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
         super.startActivityForResult(intent, requestCode);
         switch (requestCode) {
             case RESULT_OK:
-                /*mGpsInfo = new GpsInfo(this, locationListener);
-                if (mGpsInfo.checkLocation()) {
-                    mGpsInfo.initLocation();
-                }
-                break;*/
+                mGpsInfo = new GpsInfo(this, locationListener);
+                mGpsInfo.initLocation();
+                break;
         }
     }
 
@@ -200,10 +217,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                             Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    /*mGpsInfo = new GpsInfo(this, locationListener);
-                    if (mGpsInfo.checkLocation()) {
-                        mGpsInfo.initLocation();
-                    }*/
+                    mGpsInfo = new GpsInfo(this, locationListener);
+                    mGpsInfo.initLocation();
                 }
                 break;
         }
@@ -272,6 +287,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    //카메라 방향 알아오기
     private void addSensorListener() {
 
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -414,27 +430,31 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onStart() {
         super.onStart();
-        compass.start();
+        mCompass.start();
+        mLightInfo.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        compass.stop();
+        mCompass.stop();
+        mLightInfo.stop();
         mCameraView.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        compass.start();
+        mCompass.start();
+        mLightInfo.start();
         mCameraView.onResume();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        compass.stop();
+        mLightInfo.stop();
+        mCompass.stop();
     }
 
 

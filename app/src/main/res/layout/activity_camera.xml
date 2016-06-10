@@ -59,7 +59,19 @@
         android:textColor="#ffffff"
         android:background="@color/colorAccent"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentTop="true"/>
+
+    <TextView
+        android:id="@+id/activity_camera_light_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:textColor="#ffffff"
+        android:background="@color/colorAccent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        />
+
 
     <ImageView
         android:id="@+id/activity_camera_compass"

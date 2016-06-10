@@ -17,7 +17,7 @@ import static android.content.Context.LOCATION_SERVICE;
 /**
  * Created by HeungSun-AndBut on 2016. 6. 7..
  */
-
+//TODO 추후에 나침반, GSP, 조도 값 3가지 모두 한 클래스로 통합 관리
 public class GpsInfo {
 
     private final Context mContext;
@@ -53,7 +53,7 @@ public class GpsInfo {
         }
     }
 
-    public Location getLocation() {
+    public Location initLocation() {
         try {
             if (checkLocation()) {
                 // First get location from Network Provider
