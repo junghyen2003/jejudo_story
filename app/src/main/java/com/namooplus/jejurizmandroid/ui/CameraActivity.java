@@ -35,8 +35,10 @@ import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,7 +76,7 @@ import static com.google.android.gms.maps.CameraUpdateFactory.newLatLng;
  */
 
 public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
-        View.OnTouchListener, CameraHostProvider, OnMapReadyCallback {
+        View.OnTouchListener, CameraHostProvider, OnMapReadyCallback, CompoundButton.OnCheckedChangeListener {
 
     private static final String[] ACTIVITY_CAMERA_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
     private static final int ACCESS_FINE_LOCATION = 3390;
@@ -95,6 +97,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private TextView mTxLight;
     private DrawingView mDvDrawingView;
     private List<Camera.Area> mFocusList;
+    private Switch mSwitch;
 
 
     private ProgressDialog mProgressDialog;
@@ -131,12 +134,15 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.activity_camera_map_fragment);
         mCompass = new Compass(this);
         mCompass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
+        mSwitch = (Switch) findViewById(R.id.activity_camera_map_switch);
 
+        mSwitch.setOnCheckedChangeListener(this);
         mBtnTakePicture.setOnClickListener(this);
         mTxLocation.setOnClickListener(this);
         mCameraView.setOnTouchListener(this);
 
         mapFragment.getMapAsync(this);
+        mapFragment.getView().setVisibility(View.GONE);
 
         mCameraView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
@@ -164,6 +170,19 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         } else {
             mGpsInfo = new GpsInfo(this, locationListener);
             mGpsInfo.initLocation();
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId()) {
+            case R.id.activity_camera_map_switch:
+                if(isChecked) {
+                    mapFragment.getView().setVisibility(View.VISIBLE);
+                } else {
+                    mapFragment.getView().setVisibility(View.GONE);
+                }
+                break;
         }
     }
 
