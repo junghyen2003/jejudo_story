@@ -37,6 +37,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,9 @@ import com.commonsware.cwac.camera.CameraUtils;
 import com.commonsware.cwac.camera.CameraView;
 import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.SimpleCameraHost;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.common.CameraConfig;
 import com.namooplus.jejurizmandroid.common.Compass;
@@ -62,12 +66,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.google.android.gms.maps.CameraUpdateFactory.newLatLng;
+
 /**
  * Created by HeungSun-AndBut on 2016. 6. 5..
  */
 
 public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
-        View.OnTouchListener, CameraHostProvider {
+        View.OnTouchListener, CameraHostProvider{//, OnMapReadyCallback {
 
     private static final String[] LOCATION_FINE_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION};
     private static final int ACCESS_FINE_LOCATION = 3390;
@@ -95,12 +101,15 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     private int mCameraWidth;
     private int mCameraHeight;
-
+    private MapFragment mapFragment;
+    private LinearLayout mapLinear;
     public static MyCameraHost mMyCameraHost;
 
+    private GoogleMap map;
     private Compass mCompass;
     private GpsInfo mGpsInfo;
     private LightInfo mLightInfo;
+
 
     private float mLightValue;
 
@@ -118,6 +127,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mDvDrawingView = (DrawingView) findViewById(R.id.activity_camera_drawingview);
         mTxLocation = (TextView) findViewById(R.id.activity_camera_location_info);
         mTxLight = (TextView) findViewById(R.id.activity_camera_light_info);
+        //mapLinear = (LinearLayout) findViewById(R.id.activity_camera_map_fragment);
         mCompass = new Compass(this);
         mCompass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
 
@@ -151,13 +161,22 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             mGpsInfo = new GpsInfo(this, locationListener);
             mGpsInfo.initLocation();
         }
+
+
+        //mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.activity_camera_map_fragment);
+
+        //mapFragment = new MapFragment();
+        //getFragmentManager().beginTransaction().add(mapFragment, "mapFragment").commit();
+
+        //mapFragment.getMapAsync(this);
+
     }
 
     //조도 값 리스너
     private SensorEventListener lightSensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if(event.sensor.getType() == Sensor.TYPE_LIGHT){
+            if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
                 mLightValue = event.values[0];
                 DecimalFormat format = new DecimalFormat(".##");
                 mTxLight.setText(format.format(mLightValue));
@@ -175,6 +194,13 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         public void onLocationChanged(Location location) {
             mCurrentLat = location.getLatitude();
             mCurrentLon = location.getLongitude();
+
+            LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
+            if (map != null) {
+                map.moveCamera(newLatLng(latlng));
+            }
+            Log.i("HS", "location listener");
+
             mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
         }
 
@@ -193,7 +219,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             Log.i("HS", "onProviderDisabled");
         }
     };
-
 
 
     @Override
@@ -224,7 +249,22 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    /*@Override
+    public void onMapReady(GoogleMap googleMap) {
+        try {
+            Log.i("HS","onMapReady");
+            map = googleMap;
+            map.setMyLocationEnabled(true);
 
+            LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
+
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 13));
+
+        } catch (SecurityException e) {
+            Log.i("HS","onMapReady " + e.getMessage());
+        }
+    }
+*/
     //화면 포커스 맞추기
     private void focusOnTouch(MotionEvent event) {
 

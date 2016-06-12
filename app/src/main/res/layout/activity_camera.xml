@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (c) 2016. Ted Park. All Rights Reserved
-  -->
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000"
-
-    >
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/transparent">
         android:layout_centerInParent="true">
 
         <com.commonsware.cwac.camera.CameraView
@@ -55,33 +49,38 @@
         android:id="@+id/activity_camera_location_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:textColor="#ffffff"
-        android:background="@color/colorAccent"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true"
+        android:layout_margin="30dp"
+        android:background="@color/colorAccent"
+        android:textColor="#ffffff" />
 
     <TextView
         android:id="@+id/activity_camera_light_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:textColor="#ffffff"
-        android:background="@color/colorAccent"
-        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        />
-
+        android:layout_alignParentRight="true"
+        android:layout_margin="30dp"
+        android:background="@color/colorAccent"
+        android:textColor="#ffffff" />
 
     <ImageView
         android:id="@+id/activity_camera_compass"
         android:layout_width="20dp"
         android:layout_height="50dp"
-        android:layout_margin="50dp"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="50dp"
         android:contentDescription="@string/activity_camera_compass"
         android:scaleType="fitXY"
         android:src="@drawable/compass" />
+
+<!--    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/activity_camera_map_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:name="com.google.android.gms.maps.MapFragment"/>-->
 
 </RelativeLayout>
