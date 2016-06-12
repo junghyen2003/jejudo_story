@@ -55,13 +55,14 @@ public class GpsInfo {
 
     public Location initLocation() {
         try {
+            Log.d("HS", "initLocation");
             if (checkLocation()) {
                 // First get location from Network Provider
                 if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                     locationManager.requestLocationUpdates(
                             LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATES, MIN_DISTANCE_UPDATES,
                             locationListener);
-                    Log.d("Network", "Network");
+                    Log.d("HS", "network enabled");
                     if (locationManager != null) {
                         location = locationManager
                                 .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -77,7 +78,7 @@ public class GpsInfo {
                         locationManager.requestLocationUpdates(
                                 LocationManager.GPS_PROVIDER, MIN_TIME_UPDATES, MIN_DISTANCE_UPDATES,
                                 locationListener);
-                        Log.d("GPS Enabled", "GPS Enabled");
+                        Log.d("HS", "GPS Enabled");
                         if (locationManager != null) {
                             location = locationManager
                                     .getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -88,6 +89,7 @@ public class GpsInfo {
                         }
                     }
                 }
+                Log.d("HS", "gps setting out");
             }
         } catch (SecurityException e) {
             Log.i("HS", "e : " + e.toString());
