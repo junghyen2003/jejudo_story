@@ -53,6 +53,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.namooplus.jejurizmandroid.ExcelManager;
 import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.common.CameraConfig;
 import com.namooplus.jejurizmandroid.common.Compass;
@@ -69,6 +70,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static com.google.android.gms.maps.CameraUpdateFactory.newLatLng;
 
 /**
@@ -78,9 +80,11 @@ import static com.google.android.gms.maps.CameraUpdateFactory.newLatLng;
 public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
         View.OnTouchListener, CameraHostProvider, OnMapReadyCallback, CompoundButton.OnCheckedChangeListener {
 
-    private static final String[] ACTIVITY_CAMERA_PERMISSION = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
-    private static final int ACCESS_FINE_LOCATION = 3390;
-    private static final int ACCESS_CAMERA = 3391;
+    private static final String[] ACTIVITY_CAMERA_PERMISSION = {ACCESS_FINE_LOCATION,
+            Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ,Manifest.permission.READ_EXTERNAL_STORAGE};
+    private static final int ACCESS_PERMISSION = 3390;
+
 
     static final int FOCUS_AREA_WEIGHT = 1000;
 
@@ -159,25 +163,28 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
 
         mLightInfo = new LightInfo(this, lightSensorListener);
+
         //방향전환 감지
         addSensorListener();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ((PackageManager.PERMISSION_GRANTED !=
-                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) ||
-                (PackageManager.PERMISSION_GRANTED !=
-                        checkSelfPermission(Manifest.permission.CAMERA)))) {
-            requestPermissions(ACTIVITY_CAMERA_PERMISSION, ACCESS_FINE_LOCATION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                (PackageManager.PERMISSION_GRANTED != checkSelfPermission(ACCESS_FINE_LOCATION) ||
+                        (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.CAMERA)) ||
+                        (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) ||
+                        (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)))) {
+            requestPermissions(ACTIVITY_CAMERA_PERMISSION, ACCESS_PERMISSION);
         } else {
             mGpsInfo = new GpsInfo(this, locationListener);
             mGpsInfo.initLocation();
         }
+
     }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
             case R.id.activity_camera_map_switch:
-                if(isChecked) {
+                if (isChecked) {
                     mapFragment.getView().setVisibility(View.VISIBLE);
                 } else {
                     mapFragment.getView().setVisibility(View.GONE);
@@ -249,24 +256,40 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case ACCESS_FINE_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
-                            Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    mGpsInfo = new GpsInfo(this, locationListener);
-                    mGpsInfo.initLocation();
-                }
-                break;
-            case ACCESS_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
-                            Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                break;
+        if(requestCode == ACCESS_PERMISSION && grantResults.length > 0) {
+            //위치 권한
+            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.CAMERA)) {
+                Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                mGpsInfo = new GpsInfo(this, locationListener);
+                mGpsInfo.initLocation();
+            }
+
+            //카메라 권한
+            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                mGpsInfo = new GpsInfo(this, locationListener);
+                mGpsInfo.initLocation();
+            }
+
+            //파일 쓰기 권한
+            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            }
+
+            //읽기 쓰기 권한
+            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
     }
 
@@ -403,9 +426,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    public void showTakenPicture(Uri uri) {
+    public void afterTakenPicture(File file) {
+        ExcelManager.getInstance().saveExcelFile(file.getAbsolutePath(),
+                mLightValue, mCompass.getAzimuth(), mCurrentLat, mCurrentLon);
+        mBtnTakePicture.setEnabled(true);
         setProgress(false);
-        Toast.makeText(CameraActivity.this, "이미지를 보여주기 만들어야징 : " + uri.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(CameraActivity.this, "작업 완료", Toast.LENGTH_SHORT).show();
     }
 
     private void takePicture() {
@@ -676,7 +702,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showTakenPicture(Uri.parse(photo.toString()));
+                                afterTakenPicture(photo);
                             }
                         });
 

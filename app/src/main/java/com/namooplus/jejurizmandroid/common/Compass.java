@@ -47,6 +47,9 @@ public class Compass implements SensorEventListener {
         sensorManager.unregisterListener(this);
     }
 
+    public float getAzimuth() {
+        return currectAzimuth;
+    }
     @Override
     public void onSensorChanged(SensorEvent event) {
         // get the angle around the z-axis rotated
