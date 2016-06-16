@@ -90,4 +90,36 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"/>
 
+    <!--오른쪽 벽 -->
+    <LinearLayout
+        android:layout_alignParentRight="true"
+        android:layout_width="@dimen/black_screen_horizontal_space"
+        android:layout_height="match_parent"
+        android:background="#55000000"/>
+
+    <!--왼쪽쪽 벽 -->
+    <LinearLayout
+        android:layout_alignParentLeft="true"
+        android:layout_width="@dimen/black_screen_horizontal_space"
+        android:layout_height="match_parent"
+        android:background="#55000000"/>
+
+    <!--상단쪽 벽 -->
+    <LinearLayout
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/black_screen_vertical_space"
+        android:layout_marginRight="@dimen/black_screen_horizontal_space"
+        android:layout_marginLeft="@dimen/black_screen_horizontal_space"
+        android:background="#55000000"/>
+    <!--상단쪽 벽 -->
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/black_screen_vertical_space"
+        android:layout_marginRight="@dimen/black_screen_horizontal_space"
+        android:layout_marginLeft="@dimen/black_screen_horizontal_space"
+        android:background="#55000000"/>
+
+
 </RelativeLayout>

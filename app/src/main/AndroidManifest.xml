@@ -29,7 +29,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.CameraActivity"/>
+        <activity android:name=".ui.CameraActivity"
+            android:screenOrientation="landscape" />
         <activity android:name=".ui.MainActivity"/>
 
         <meta-data
