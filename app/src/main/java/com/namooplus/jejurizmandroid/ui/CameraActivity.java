@@ -66,7 +66,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -592,8 +591,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         private Camera.Size getBestPictureSize(Camera.Parameters parameters) {
-            Camera.Size result;
-
+            //Camera.Size result;
+            return CameraUtils.getLargestPictureSize(this, parameters, false);
+            /*
             if (mCameraWidth == 0) {
                 return CameraUtils.getLargestPictureSize(this, parameters, false);
             }
@@ -614,7 +614,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
             }
             return result;
-
+*/
         }
 
         private Bitmap getCorrectOrientImage(Bitmap bitmap) {
@@ -672,13 +672,21 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
 
                 // 회전값을 보정한다
-                bitmap = Utils.rotate(bitmap, mDeviceOrientation);
+                //bitmap = Utils.rotate(bitmap, mDeviceOrientation);
                 //bitmap = getCorrectOrientImage(bitmap, photo.toString());
                 // bitmap = getCorrectOrientImage(bitmap, photo.toString());
 
-                float ratio = mCameraHeight / mCameraWidth;
+                //float ratio = mCameraHeight / mCameraWidth;
 
-                Bitmap crop_bitmap = Utils.cropCenterBitmap(bitmap, bitmap.getWidth(), (int) (bitmap.getWidth() * ratio));
+                //Bitmap crop_bitmap = Utils.cropCenterBitmap(bitmap, bitmap.getWidth(), (int) (bitmap.getWidth() * ratio));
+
+                ExifInterface exif = new ExifInterface(photo.toString());
+                int exifOrientation = exif.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                int exifDegree = Utils.exifOrientationToDegrees(exifOrientation);
+
+                Bitmap crop_bitmap = Utils.rotate(bitmap, exifDegree);
+
                 FileOutputStream fos;
 
                 fos = new FileOutputStream(photo);
