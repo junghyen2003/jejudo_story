@@ -66,6 +66,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -76,14 +77,14 @@ import static com.google.android.gms.maps.CameraUpdateFactory.newLatLng;
  * Created by HeungSun-AndBut on 2016. 6. 5..
  */
 
+//TODO 카메라 관련 리소스 분리 하기
 public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
         View.OnTouchListener, CameraHostProvider, OnMapReadyCallback, CompoundButton.OnCheckedChangeListener {
 
     private static final String[] ACTIVITY_CAMERA_PERMISSION = {ACCESS_FINE_LOCATION,
             Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ,Manifest.permission.READ_EXTERNAL_STORAGE};
+            , Manifest.permission.READ_EXTERNAL_STORAGE};
     private static final int ACCESS_PERMISSION = 3390;
-
 
     static final int FOCUS_AREA_WEIGHT = 1000;
 
@@ -159,12 +160,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
-
         mLightInfo = new LightInfo(this, lightSensorListener);
 
         //방향전환 감지
         addSensorListener();
+
+        //마쉬멜로우 권한 확인
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 (PackageManager.PERMISSION_GRANTED != checkSelfPermission(ACCESS_FINE_LOCATION) ||
@@ -208,6 +209,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         }
     };
+
     //위치 값 리스너
     private LocationListener locationListener = new LocationListener() {
         @Override
@@ -219,24 +221,19 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             if (map != null) {
                 map.moveCamera(newLatLng(latlng));
             }
-            Log.i("HS", "location listener");
-
             mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.i("HS", "onStatusChanged");
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Log.i("HS", "onProviderEnabled");
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-            Log.i("HS", "onProviderDisabled");
         }
     };
 
@@ -255,9 +252,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == ACCESS_PERMISSION && grantResults.length > 0) {
+        if (requestCode == ACCESS_PERMISSION && grantResults.length > 0) {
             //위치 권한
-            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.CAMERA)) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.CAMERA)) {
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
                         Toast.LENGTH_SHORT).show();
                 finish();
@@ -267,7 +264,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
 
             //카메라 권한
-            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
                         Toast.LENGTH_SHORT).show();
                 finish();
@@ -277,14 +274,14 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
 
             //파일 쓰기 권한
-            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
                         Toast.LENGTH_SHORT).show();
                 finish();
             }
 
             //읽기 쓰기 권한
-            if(grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
                         Toast.LENGTH_SHORT).show();
                 finish();
@@ -295,7 +292,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onMapReady(GoogleMap googleMap) {
         try {
-            Log.i("HS", "onMapReady");
             map = googleMap;
             map.setMyLocationEnabled(true);
 
@@ -390,8 +386,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                     mDeviceOrientation = 180;
                 else if (x > 5 && y < 5 && y > -5)
                     mDeviceOrientation = 270;
-            }
 
+            }
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
                 // TODO Auto-generated method stub
@@ -590,9 +586,26 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         }
 
+        //사진 결과물 사이즈 조정
         private Camera.Size getBestPictureSize(Camera.Parameters parameters) {
-            //Camera.Size result;
-            return CameraUtils.getLargestPictureSize(this, parameters, false);
+            Camera.Size result;
+            List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
+
+            result = CameraUtils.getLargestPictureSize(this, parameters, false);
+
+            Collections.sort(sizes, Collections.reverseOrder(new SizeComparator()));
+            for (Camera.Size entry : sizes) {
+
+                if (entry.height == 1080 || entry.width == 1920) {
+                    result = entry;
+                } else {
+                    break;
+                }
+
+            }
+
+            return result;
+
             /*
             if (mCameraWidth == 0) {
                 return CameraUtils.getLargestPictureSize(this, parameters, false);
@@ -615,35 +628,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
             return result;
 */
-        }
-
-        private Bitmap getCorrectOrientImage(Bitmap bitmap) {
-            bitmap = Utils.rotate(bitmap, mDeviceOrientation);
-            return bitmap;
-        }
-
-        private Bitmap getCorrectOrientImage(Bitmap bitmap, String path) {
-
-            ExifInterface exif = null;
-            try {
-
-                exif = new ExifInterface(path);
-
-                if (exif != null) {
-                    int exifOrientation = exif.getAttributeInt(
-                            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                    int exifDegree = Utils.exifOrientationToDegrees(exifOrientation);
-                    bitmap = Utils.rotate(bitmap, exifDegree);
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return bitmap;
-
-
         }
 
 
@@ -670,16 +654,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                     photo.delete();
                 }
 
-
-                // 회전값을 보정한다
-                //bitmap = Utils.rotate(bitmap, mDeviceOrientation);
-                //bitmap = getCorrectOrientImage(bitmap, photo.toString());
-                // bitmap = getCorrectOrientImage(bitmap, photo.toString());
-
-                //float ratio = mCameraHeight / mCameraWidth;
-
-                //Bitmap crop_bitmap = Utils.cropCenterBitmap(bitmap, bitmap.getWidth(), (int) (bitmap.getWidth() * ratio));
-
+                //사진 회전에 따른 처리
                 ExifInterface exif = new ExifInterface(photo.toString());
                 int exifOrientation = exif.getAttributeInt(
                         ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
@@ -696,9 +671,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 fos.flush();
                 fos.close();
 
-
                 // 사진을 저장한뒤 미디어를 스캔해서 저장한 파일을 읽어온다
-                MediaScannerConnection.scanFile(activity, new String[]{photo.getPath()}, new String[]{"image/jpeg"}, new MediaScannerConnection.MediaScannerConnectionClient() {
+                MediaScannerConnection.scanFile(activity, new String[]{photo.getPath()},
+                        new String[]{"image/jpeg"}, new MediaScannerConnection.MediaScannerConnectionClient() {
                     @Override
                     public void onMediaScannerConnected() {
 
@@ -706,7 +681,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
                     @Override
                     public void onScanCompleted(String path, Uri uri) {
-
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -716,7 +690,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
                     }
                 });
-
 
             } catch (Exception e) {
                 handleException(e);
