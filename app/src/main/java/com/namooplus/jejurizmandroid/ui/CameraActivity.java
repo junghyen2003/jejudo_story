@@ -410,19 +410,18 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         if (show) {
             if (mProgressDialog == null) {
                 mProgressDialog = new ProgressDialog(CameraActivity.this);
-                mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
-                mProgressDialog.setIndeterminate(true);
-                mProgressDialog.setCancelable(false);
-                mProgressDialog.show();
-            } else if (!mProgressDialog.isShowing()) {
-                mProgressDialog.show();
             }
+
+            mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
         } else {
             if (mProgressDialog != null && mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
+                mProgressDialog = null;
             }
         }
-
     }
 
     private void animateShutter() {
@@ -589,7 +588,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
 
             try {
-
+                setProgress(false);
                 AfterTakenDailog afterDialog = AfterTakenDailog.newInstance(bitmap
                         , mLightValue, mCompassValue, mCurrentLat, mCurrentLon);
                 afterDialog.show(getSupportFragmentManager(), "afterTaken");
@@ -598,7 +597,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void run() {
                         mBtnTakePicture.setEnabled(true);
-                        setProgress(false);
                     }
                 });
             } catch (Exception e) {
