@@ -410,6 +410,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         if (show) {
             if (mProgressDialog == null) {
                 mProgressDialog = new ProgressDialog(CameraActivity.this);
+            } else if(mProgressDialog.isShowing()) {
+                return;
             }
 
             mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
