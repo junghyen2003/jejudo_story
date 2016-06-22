@@ -589,7 +589,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
 
             try {
-
+                setProgress(false);
                 AfterTakenDailog afterDialog = AfterTakenDailog.newInstance(bitmap
                         , mLightValue, mCompassValue, mCurrentLat, mCurrentLon);
                 afterDialog.show(getSupportFragmentManager(), "afterTaken");
@@ -598,7 +598,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void run() {
                         mBtnTakePicture.setEnabled(true);
-                        setProgress(false);
                     }
                 });
             } catch (Exception e) {

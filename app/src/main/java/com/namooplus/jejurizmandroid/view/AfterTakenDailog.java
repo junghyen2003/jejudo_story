@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.namooplus.jejurizmandroid.ExcelManager;
 import com.namooplus.jejurizmandroid.R;
+import com.namooplus.jejurizmandroid.common.PreferenceManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,6 +58,8 @@ public class AfterTakenDailog extends DialogFragment {
     private double mLat;
     private double mLon;
 
+    PreferenceManager mPreferenceManager;
+
     public static AfterTakenDailog newInstance(Bitmap bit, float bright, float compass, double lat, double lon) {
 
         AfterTakenDailog f = new AfterTakenDailog();
@@ -84,6 +87,7 @@ public class AfterTakenDailog extends DialogFragment {
         mLat = getArguments().getDouble("lat");
         mLon = getArguments().getDouble("lon");
 
+        mPreferenceManager = new PreferenceManager(getContext());
     }
 
 
@@ -106,6 +110,8 @@ public class AfterTakenDailog extends DialogFragment {
         mTxLongitute.setText("경도 : " + mLon);
         mTxLatitude.setText("위도 : " + mLat);
 
+        mEtTitle.setText(mPreferenceManager.getImageTitle());
+
         mBtnOk = (Button) view.findViewById(R.id.dialog_after_taken_ok);
         mBtnCancle = (Button) view.findViewById(R.id.dialog_after_taken_cancle);
 
@@ -124,7 +130,6 @@ public class AfterTakenDailog extends DialogFragment {
                     Toast.makeText(getActivity(), R.string.dialog_after_taken_dialog_need_title, Toast.LENGTH_SHORT).show();
                 } else {
                     saveData();
-
                 }
             }
         });
@@ -186,10 +191,12 @@ public class AfterTakenDailog extends DialogFragment {
         try {
             File dir = new File(SAVE_IMAGE_PATH);
             if (!dir.exists()) {
-                dir.mkdir();
+                dir.mkdirs();
             }
 
-            final File file = new File(SAVE_IMAGE_PATH + mTitle);
+            final String imageFilename = System.currentTimeMillis() + "_" + mTitle + ".png";
+
+            final File file = new File(SAVE_IMAGE_PATH + imageFilename);
 
             if (file.exists()) {
                 file.delete();
@@ -197,13 +204,13 @@ public class AfterTakenDailog extends DialogFragment {
 
             fos = new FileOutputStream(file);
 
-            mBit.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            mBit.compress(Bitmap.CompressFormat.PNG, 100, fos);
 
             fos.flush();
 
             //안드로이드 이미지 캐쉬에 등록
             MediaScannerConnection.scanFile(getActivity(), new String[]{file.getAbsolutePath()},
-                    new String[]{"image/jpeg"}, new MediaScannerConnection.MediaScannerConnectionClient() {
+                    new String[]{"image/png"}, new MediaScannerConnection.MediaScannerConnectionClient() {
                         @Override
                         public void onMediaScannerConnected() {
 
@@ -218,6 +225,7 @@ public class AfterTakenDailog extends DialogFragment {
                                     //엑셀에 저장
                                     ExcelManager.getInstance().saveExcelFile(file.getAbsolutePath(), mTitle,
                                             mBright, mCompass, mLat, mLon);
+                                    mPreferenceManager.saveImageTitle(mTitle);
                                     dismiss();
                                 }
                             });
