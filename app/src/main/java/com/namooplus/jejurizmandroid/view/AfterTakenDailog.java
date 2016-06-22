@@ -186,7 +186,7 @@ public class AfterTakenDailog extends DialogFragment {
         try {
             File dir = new File(SAVE_IMAGE_PATH);
             if (!dir.exists()) {
-                dir.mkdir();
+                dir.mkdirs();
             }
 
             final File file = new File(SAVE_IMAGE_PATH + mTitle);

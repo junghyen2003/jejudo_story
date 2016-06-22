@@ -389,9 +389,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             mCameraView.takePicture(false, true);
             mBtnTakePicture.setEnabled(false);
             animateShutter();
+            setProgress(true);
         } catch (IllegalStateException ex) {
             Toast.makeText(CameraActivity.this, "사진찍기 에러 : " + ex.toString(), Toast.LENGTH_SHORT).show();
-
         }
     }
 
@@ -444,7 +444,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onAnimationEnd(Animator animation) {
                 mVShutter.setVisibility(View.GONE);
-                setProgress(true);
             }
         });
         animatorSet.start();
