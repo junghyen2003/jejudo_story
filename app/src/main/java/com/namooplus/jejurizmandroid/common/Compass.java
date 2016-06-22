@@ -34,6 +34,8 @@ public class Compass implements SensorEventListener {
 
     private Activity mActivity;
 
+    private int direction = 0;
+
     // compass arrow to rotate
     public ImageView arrowView = null;
 
@@ -81,6 +83,10 @@ public class Compass implements SensorEventListener {
         }
     }
 
+    public int getDirection() {
+        return direction;
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         // get the angle around the z-axis rotated
@@ -99,22 +105,33 @@ public class Compass implements SensorEventListener {
         //실제 값 가져오기
         SensorManager.getOrientation(rotationMatrix, orientationData);
         azimuth = (float) Math.toDegrees(orientationData[0]);
+        float r3 = (float) Math.toDegrees(orientationData[2]);
 
 
         //핸드폰을 가로로 한상태에서 눈에서 45도로 위로 했을때를 기준으로 산출
-        int direction = (int) azimuth;
-        int result = (int) (azimuth + 180) % 360;
-        if (-45 <= direction && direction < 45) {
-            Log.i(TAG, "direction : 남쪽");
-        } else if (45 <= direction && direction < 125) {
-            Log.i(TAG, "direction : 서쪽");
-        } else if ((125 <= direction && direction < 180) || (-125 > direction)) {
-            Log.i(TAG, "direction : 북쪽");
-        } else if (-45 >= direction && direction > -125) {
-            Log.i(TAG, "direction : 동쪽");
+        if (r3 < 0) {
+            direction = (int) (azimuth + 180) % 360;
+            if (-45 <= direction && direction < 45) {
+                //Log.i(TAG, "direction : 남쪽");
+            } else if (45 <= direction && direction < 125) {
+                //Log.i(TAG, "direction : 서쪽");
+            } else if ((125 <= direction && direction < 180) || (-125 > direction)) {
+                //Log.i(TAG, "direction : 북쪽");
+            } else if (-45 >= direction && direction > -125) {
+                //Log.i(TAG, "direction : 동쪽");
+            }
+        } else {
+            direction = (int) (azimuth + 360) % 360;
+            if (-45 <= direction && direction < 45) {
+                //Log.i(TAG, "direction : 북쪽");
+            } else if (45 <= direction && direction < 125) {
+                //Log.i(TAG, "direction : 동쪽");
+            } else if ((125 <= direction && direction < 180) || (-125 > direction)) {
+                //Log.i(TAG, "direction : 남쪽");
+            } else if (-45 >= direction && direction > -125) {
+                //Log.i(TAG, "direction : 서쪽");
+            }
         }
-        //같은 기준으로 했을때 북쪽을 기준으로 했을대 방향
-        Log.i(TAG, "integer : " + result);
 
         if (arrowView == null) {
             Log.i(TAG, "arrow view is not set");
@@ -132,53 +149,6 @@ public class Compass implements SensorEventListener {
 
         arrowView.startAnimation(an);
 
-        /*
-        final float alpha = 0.97f;
-
-        synchronized (this) {
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                mGravity[0] = alpha * mGravity[0] + (1 - alpha) * event.values[0];
-                mGravity[1] = alpha * mGravity[1] + (1 - alpha) * event.values[1];
-                mGravity[2] = alpha * mGravity[2] + (1 - alpha) * event.values[2];
-            }
-
-            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha) * event.values[0];
-                mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha) * event.values[1];
-                mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha) * event.values[2];
-            }
-
-            float R[] = new float[9];
-            float I[] = new float[9];
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-            if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-                // Log.d(TAG, "azimuth (rad): " + azimuth);
-                azimuth = (float) Math.toDegrees(orientation[0]); // orientation
-
-                azimuth = (azimuth + 360) % 360;
-
-                if (arrowView == null) {
-                    Log.i(TAG, "arrow view is not set");
-                    return;
-                }
-
-                Animation an = new RotateAnimation(-currectAzimuth, -azimuth,
-                        Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF,
-                        0.5f);
-                currectAzimuth = azimuth;
-
-                an.setDuration(500);
-                an.setRepeatCount(0);
-                an.setFillAfter(true);
-
-                Log.i("HS","currectAzimuth : " + currectAzimuth);
-                Log.i("HS","orientation : " + mOrientation);
-
-                arrowView.startAnimation(an);
-            }
-        }*/
     }
 
     @Override

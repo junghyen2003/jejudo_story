@@ -7,22 +7,15 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
-import android.media.ExifInterface;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +24,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -52,32 +44,34 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.namooplus.jejurizmandroid.ExcelManager;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.namooplus.jejurizmandroid.R;
-import com.namooplus.jejurizmandroid.common.CameraConfig;
+import com.namooplus.jejurizmandroid.common.AppSetting;
 import com.namooplus.jejurizmandroid.common.Compass;
 import com.namooplus.jejurizmandroid.common.GpsInfo;
 import com.namooplus.jejurizmandroid.common.LightInfo;
-import com.namooplus.jejurizmandroid.common.Utils;
+import com.namooplus.jejurizmandroid.view.AfterTakenDailog;
 import com.namooplus.jejurizmandroid.view.DrawingView;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static com.google.android.gms.maps.CameraUpdateFactory.newLatLng;
+import static com.namooplus.jejurizmandroid.common.AppSetting.INTERVAL_MAP_REFRESH;
 
 /**
  * Created by HeungSun-AndBut on 2016. 6. 5..
  */
 
-//TODO 카메라 관련 리소스 분리 하기
 public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
         View.OnTouchListener, CameraHostProvider, OnMapReadyCallback, CompoundButton.OnCheckedChangeListener {
 
@@ -105,11 +99,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
 
     private ProgressDialog mProgressDialog;
-    //화면 방향
-    private int mDeviceOrientation;
-
-    private int mCameraWidth;
-    private int mCameraHeight;
     private MapFragment mapFragment;
     public static MyCameraHost mMyCameraHost;
 
@@ -120,7 +109,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
 
     private float mLightValue;
+    private float mCompassValue;
 
+    private Marker mMarker;
+    MarkerOptions mo;
+
+    private Timer timer;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,25 +142,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mapFragment.getMapAsync(this);
         mapFragment.getView().setVisibility(View.GONE);
 
-        mCameraView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                mCameraView.getViewTreeObserver().removeOnPreDrawListener(this);
-
-                mCameraWidth = mCameraView.getWidth();
-                mCameraHeight = mCameraView.getHeight();
-
-                return true;
-            }
-        });
-
-        mLightInfo = new LightInfo(this, lightSensorListener);
-
-        //방향전환 감지
-        addSensorListener();
+        mLightInfo = new LightInfo(this);
 
         //마쉬멜로우 권한 확인
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 (PackageManager.PERMISSION_GRANTED != checkSelfPermission(ACCESS_FINE_LOCATION) ||
                         (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.CAMERA)) ||
@@ -177,8 +155,41 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             mGpsInfo = new GpsInfo(this, locationListener);
             mGpsInfo.initLocation();
         }
-
     }
+
+    private TimerTask runJob = new TimerTask() {
+        public void run() {
+            CameraActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mLightValue = mLightInfo.getmLightValue();
+                    mCompassValue = mCompass.getDirection();
+                    LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
+
+                    if (map != null) {
+                        CameraPosition cameraPosition = new CameraPosition.Builder()
+                                .target(latlng)             // Sets the center of the map to current location
+                                .zoom(17)                   // Sets the zoom
+                                .bearing(mCompass.getDirection()) // Sets the orientation of the camera to east
+                                .tilt(0)                   // Sets the tilt of the camera to 0 degrees
+                                .build();                   // Creates a CameraPosition from the builder
+                        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
+                        if(mMarker != null) {
+                            mMarker.remove();
+                        }
+                        mo.position(latlng);
+                        mMarker = map.addMarker(mo);
+                    }
+
+                    mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+                    mTxLight.setText("조도:" + mLightValue);
+
+                }
+            });
+        }
+    };
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -189,26 +200,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 } else {
                     mapFragment.getView().setVisibility(View.GONE);
                 }
+
                 break;
         }
     }
-
-    //조도 값 리스너
-    private SensorEventListener lightSensorListener = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-                mLightValue = event.values[0];
-                DecimalFormat format = new DecimalFormat(".##");
-                mTxLight.setText(format.format(mLightValue));
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-        }
-    };
 
     //위치 값 리스너
     private LocationListener locationListener = new LocationListener() {
@@ -216,12 +211,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         public void onLocationChanged(Location location) {
             mCurrentLat = location.getLatitude();
             mCurrentLon = location.getLongitude();
-
-            LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
-            if (map != null) {
-                map.moveCamera(newLatLng(latlng));
-            }
-            mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
         }
 
         @Override
@@ -293,11 +282,17 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     public void onMapReady(GoogleMap googleMap) {
         try {
             map = googleMap;
-            map.setMyLocationEnabled(true);
+            map.setMyLocationEnabled(false);
+
+            map.getUiSettings().setCompassEnabled(false);
 
             LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17));
 
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 13));
+            mo = new MarkerOptions();
+            mo.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+            mo.position(latlng);
+            mMarker = map.addMarker(mo);
 
         } catch (SecurityException e) {
             Log.i("HS", "onMapReady " + e.getMessage());
@@ -343,7 +338,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 touchRect.right * 2000 / mCameraView.getWidth() - FOCUS_AREA_WEIGHT,
                 touchRect.bottom * 2000 / mCameraView.getHeight() - FOCUS_AREA_WEIGHT);
 
-
         doTouchFocus(targetFocusRect);
 
 
@@ -363,37 +357,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
         }, 1000);
 
-
-    }
-
-    //카메라 방향 알아오기
-    private void addSensorListener() {
-
-        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sensorManager.registerListener(new SensorEventListener() {
-
-            @Override
-            public void onSensorChanged(SensorEvent event) {
-
-                float x = event.values[0];
-                float y = event.values[1];
-
-                if (x < 5 && x > -5 && y > 5)
-                    mDeviceOrientation = 0;
-                else if (x < -5 && y < 5 && y > -5)
-                    mDeviceOrientation = 90;
-                else if (x < 5 && x > -5 && y < -5)
-                    mDeviceOrientation = 180;
-                else if (x > 5 && y < 5 && y > -5)
-                    mDeviceOrientation = 270;
-
-            }
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                // TODO Auto-generated method stub
-
-            }
-        }, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
     }
 
     public void doTouchFocus(Rect tfocusRect) {
@@ -419,14 +382,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 onTakePicture(v);
                 break;
         }
-    }
-
-    public void afterTakenPicture(File file) {
-        ExcelManager.getInstance().saveExcelFile(file.getAbsolutePath(),
-                mLightValue, mCompass.getAzimuth(), mCurrentLat, mCurrentLon);
-        mBtnTakePicture.setEnabled(true);
-        setProgress(false);
-        Toast.makeText(CameraActivity.this, "작업 완료", Toast.LENGTH_SHORT).show();
     }
 
     private void takePicture() {
@@ -514,6 +469,11 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         super.onStart();
         mCompass.start();
         mLightInfo.start();
+        if(timer == null) {
+            timer = new Timer();
+            timer.schedule(runJob, 0, INTERVAL_MAP_REFRESH);
+        }
+
     }
 
     @Override
@@ -558,7 +518,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         protected File getPhotoDirectory() {
-            return new File(CameraConfig.SAVE_IMAGE_PATH);
+            return new File(AppSetting.SAVE_IMAGE_PATH);
         }
 
         @Override
@@ -575,8 +535,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         public Camera.Size getPictureSize(PictureTransaction xact, Camera.Parameters parameters) {
-
-
             //   return super.getPictureSize(xact, parameters);
             if (bestPictureSize == null) {
                 bestPictureSize = getBestPictureSize(parameters);
@@ -606,91 +564,44 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
             return result;
 
-            /*
-            if (mCameraWidth == 0) {
-                return CameraUtils.getLargestPictureSize(this, parameters, false);
-            }
-            List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
-
-            Collections.sort(sizes,
-                    Collections.reverseOrder(new SizeComparator()));
-            result = sizes.get(sizes.size() - 1);
-
-            for (Camera.Size entry : sizes) {
-
-                if (entry.height >= mCameraWidth * SIZE_MULTIPLE && entry.width >= mCameraHeight * SIZE_MULTIPLE) {
-                    result = entry;
-                } else {
-                    break;
-                }
-
-
-            }
-            return result;
-*/
         }
 
 
         @Override
         public Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters) {
 
-            if (CameraConfig.FLASH_SETTING_VALUE) {
+            if (AppSetting.FLASH_SETTING_VALUE) {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
             }
 
             return super.adjustPictureParameters(xact, parameters);
         }
 
+        public Bitmap loadBitmapFromView(View v) {
+            Bitmap b = Bitmap.createBitmap( v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(b);
+            v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+            v.draw(c);
+            return b;
+        }
+
         @Override
         public void saveImage(PictureTransaction xact, byte[] image) {
-
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
 
             try {
 
-                final File photo = getPhotoPath();
+                AfterTakenDailog afterDialog = AfterTakenDailog.newInstance(bitmap
+                        , mLightValue, mCompassValue, mCurrentLat, mCurrentLon);
+                afterDialog.show(getSupportFragmentManager(), "afterTaken");
 
-                if (photo.exists()) {
-                    photo.delete();
-                }
-
-                //사진 회전에 따른 처리
-                ExifInterface exif = new ExifInterface(photo.toString());
-                int exifOrientation = exif.getAttributeInt(
-                        ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                int exifDegree = Utils.exifOrientationToDegrees(exifOrientation);
-
-                Bitmap crop_bitmap = Utils.rotate(bitmap, exifDegree);
-
-                FileOutputStream fos;
-
-                fos = new FileOutputStream(photo);
-
-                crop_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-
-                fos.flush();
-                fos.close();
-
-                // 사진을 저장한뒤 미디어를 스캔해서 저장한 파일을 읽어온다
-                MediaScannerConnection.scanFile(activity, new String[]{photo.getPath()},
-                        new String[]{"image/jpeg"}, new MediaScannerConnection.MediaScannerConnectionClient() {
+                CameraActivity.this.runOnUiThread(new Runnable() {
                     @Override
-                    public void onMediaScannerConnected() {
-
-                    }
-
-                    @Override
-                    public void onScanCompleted(String path, Uri uri) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                afterTakenPicture(photo);
-                            }
-                        });
-
+                    public void run() {
+                        mBtnTakePicture.setEnabled(true);
+                        setProgress(false);
                     }
                 });
-
             } catch (Exception e) {
                 handleException(e);
 

@@ -21,6 +21,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
+import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_EXCEL_PATH;
+
 /**
  * Created by HeungSun-AndBut on 2016. 6. 14..
  */
@@ -43,8 +45,6 @@ public class ExcelManager {
     }
 
     public ExcelManager() {
-
-        Log.i("HS", "엑셀 초기화");
         //저장공간을 사용할수 있는지 확인
         String extStorageState = Environment.getExternalStorageState();
         if (!Environment.MEDIA_MOUNTED.equals(extStorageState) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
@@ -52,7 +52,7 @@ public class ExcelManager {
         }
 
         //엑셀 파일 생성
-        mExcelFile = new File(Environment.getExternalStorageDirectory(), EXCEL_FILE_NAME);
+        mExcelFile = new File(SAVE_EXCEL_PATH, EXCEL_FILE_NAME);
 
         //기존 엑셀 파일이 있는지 있으면 해당 줄만큼 들고오기
         if (mExcelFile.exists()) {
@@ -76,7 +76,6 @@ public class ExcelManager {
                 HSSFSheet mySheet = myWorkBook.getSheetAt(0); //첫번째 시트만 활용
 
                 mLastRowNum = mySheet.getLastRowNum();
-                Log.i("HS", "마지막 번호 :  " + mLastRowNum);
 
                 /** We now need something to iterate through the cells. **/
                 Iterator rowIter = mySheet.rowIterator();
@@ -86,7 +85,6 @@ public class ExcelManager {
                     Iterator cellIter = myRow.cellIterator();
                     while (cellIter.hasNext()) {
                         HSSFCell myCell = (HSSFCell) cellIter.next();
-                        Log.d("HS", "Cell Value: " + myCell.toString());
                     }
                 }
             }
@@ -119,22 +117,26 @@ public class ExcelManager {
             Row row = sheet1.createRow(0);
 
             c = row.createCell(0);
-            c.setCellValue("저장 주소");
+            c.setCellValue("제목");
             c.setCellStyle(cs);
 
             c = row.createCell(1);
-            c.setCellValue("조도");
+            c.setCellValue("저장 주소");
             c.setCellStyle(cs);
 
             c = row.createCell(2);
-            c.setCellValue("방향");
+            c.setCellValue("조도");
             c.setCellStyle(cs);
 
             c = row.createCell(3);
-            c.setCellValue("위도");
+            c.setCellValue("방향");
             c.setCellStyle(cs);
 
             c = row.createCell(4);
+            c.setCellValue("위도");
+            c.setCellStyle(cs);
+
+            c = row.createCell(5);
             c.setCellValue("경도");
             c.setCellStyle(cs);
 
@@ -154,7 +156,7 @@ public class ExcelManager {
         }
     }
 
-    public void saveExcelFile(String path, float bright, float direction, double lat, double lon) {
+    public void saveExcelFile(String path, String mTitle, float bright, float direction, double lat, double lon) {
         FileOutputStream os = null;
         Cell c = null;
         try {
@@ -168,31 +170,30 @@ public class ExcelManager {
 
             mLastRowNum = sheet1.getLastRowNum();
 
-            Log.i("HS", mLastRowNum + "번째 까지 기록됨 ");
-
-            Log.i("HS", "엑셀 파일 최초 생성으로 최상단 태그명 붙이기");
             // Generate column headings
             Row row = sheet1.createRow(++mLastRowNum);
 
             c = row.createCell(0);
-            c.setCellValue(path);
+            c.setCellValue(mTitle);
 
             c = row.createCell(1);
-            c.setCellValue(bright);
+            c.setCellValue(path);
 
             c = row.createCell(2);
-            c.setCellValue(direction);
+            c.setCellValue(bright);
 
             c = row.createCell(3);
-            c.setCellValue(lat);
+            c.setCellValue(direction);
 
             c = row.createCell(4);
+            c.setCellValue(lat);
+
+            c = row.createCell(5);
             c.setCellValue(lon);
 
             os = new FileOutputStream(mExcelFile);
             myWorkBook.write(os);
 
-            Log.i("HS", "path " + mExcelFile.getAbsolutePath());
         } catch (IOException e) {
             Log.w("FileUtils", "Error writing " + mExcelFile, e);
         } catch (Exception e) {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.os.Environment;
 
 /**
  * Created by HeungSun-AndBut on 2016. 6. 5..
@@ -46,41 +47,15 @@ public class Utils {
     }
 
 
-    ///
+    public static final boolean isSDCARDMounted() {
+        String status = Environment.getExternalStorageState();
 
-    public static Bitmap cropCenterBitmap(Bitmap src, int w, int h) {
-        if(src == null)
-            return null;
+        if (status.equals(Environment.MEDIA_MOUNTED)) {
+            return true;
+        }
 
-        int width = src.getWidth();
-        int height = src.getHeight();
-
-        if(width < w && height < h)
-            return src;
-
-        int x = 0;
-        int y = 0;
-
-        if(width > w)
-            x = (width - w)/2;
-
-        if(height > h)
-            y = (height - h)/2;
-
-        int cw = w; // crop width
-        int ch = h; // crop height
-
-        if(w > width)
-            cw = width;
-
-        if(h > height)
-            ch = height;
-
-
-        return Bitmap.createBitmap(src, x, y, cw, ch);
+        return false;
     }
-
-
 
 
 }
