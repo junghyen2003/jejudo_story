@@ -407,23 +407,23 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void setProgress(boolean show) {
-        if (show) {
-            if (mProgressDialog == null) {
-                mProgressDialog = new ProgressDialog(CameraActivity.this);
-            } else if(mProgressDialog.isShowing()) {
-                return;
-            }
-
-            mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
-            mProgressDialog.setIndeterminate(true);
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
-        } else {
-            if (mProgressDialog != null && mProgressDialog.isShowing()) {
-                mProgressDialog.dismiss();
-                mProgressDialog = null;
-            }
-        }
+//        if (show) {
+//            if (mProgressDialog == null) {
+//                mProgressDialog = new ProgressDialog(CameraActivity.this);
+//            } else if(mProgressDialog.isShowing()) {
+//                return;
+//            }
+//
+//            mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
+//            mProgressDialog.setIndeterminate(true);
+//            mProgressDialog.setCancelable(false);
+//            mProgressDialog.show();
+//        } else {
+//            if (mProgressDialog != null && mProgressDialog.isShowing()) {
+//                mProgressDialog.dismiss();
+//                mProgressDialog = null;
+//            }
+//        }
     }
 
     private void animateShutter() {
