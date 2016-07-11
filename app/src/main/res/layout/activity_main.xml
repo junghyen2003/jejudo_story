@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
     <FrameLayout
         android:id="@+id/container"
@@ -16,8 +14,7 @@
         <android.support.design.widget.CoordinatorLayout
             android:id="@+id/main_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.devband.tourizm.android.ui.MainActivity">
+            android:layout_height="match_parent">
 
             <android.support.design.widget.AppBarLayout
                 android:id="@+id/appbar"
@@ -29,33 +26,40 @@
                     android:id="@+id/app_tool_bar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:background="@color/actionbar_background"
+                    android:background="@color/colorPrimary"
                     app:popupTheme="@style/CustomActionBarTheme" />
 
 
             </android.support.design.widget.AppBarLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/activity_main_camera_sign_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/temp_camera_image"
+                    android:layout_margin="10dp"
+                    android:text="activity_main_camera_sign_button" />
+
+                <ImageButton
+                    android:id="@+id/activity_main_camera_landscape_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/temp_landscape_image"
+                    android:layout_margin="10dp"
+                    android:text="activity_main_camera_sign_button" />
+            </LinearLayout>
+
         </android.support.design.widget.CoordinatorLayout>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/activity_main_camera_sign_button"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="activity_main_camera_sign_button" />
-
-            <ImageButton
-                android:id="@+id/activity_main_camera_landscape_button"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="activity_main_camera_sign_button" />
-        </LinearLayout>
-
     </FrameLayout>
+
+
+
 </android.support.v4.widget.DrawerLayout>

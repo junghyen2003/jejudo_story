@@ -4,13 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.namooplus.jejurizmandroid.R;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
@@ -20,10 +21,13 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.activity_main_camera_sign_button)
-    private ImageButton mSignCamera;
+    public ImageButton mSignCamera;
 
     @BindView(R.id.activity_main_camera_landscape_button)
-    private ImageButton mLandscapeCamera;
+    public ImageButton mLandscapeCamera;
+
+    @BindView(R.id.app_tool_bar)
+    public Toolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,14 +36,21 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(MainActivity.this);
 
-        Button btn = (Button)findViewById(R.id.activity_main_camera_button);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, CameraActivity.class);
-                startActivity(i);
-            }
-        });
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setTitle("나무소프트");
+
     }
 
+    @OnClick(R.id.activity_main_camera_sign_button)
+    public void signCameraClick(View v) {
+        Intent i = new Intent(MainActivity.this, CameraActivity.class);
+        startActivity(i);
+    }
+
+    @OnClick(R.id.activity_main_camera_landscape_button)
+    public void landscapeCameraClick(View v) {
+        Intent i = new Intent(MainActivity.this, CameraActivity.class);
+        startActivity(i);
+    }
 }
