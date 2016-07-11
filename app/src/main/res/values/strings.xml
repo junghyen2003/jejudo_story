@@ -16,4 +16,7 @@
     <string name="dialog_after_taken_dialog_save">저장이 완료되었습니다.</string>
 
     <string name="activity_intro_no_mounted">SDCARD가 없습니다.</string>
+
+    <string name="activity_main_camera_sign_button">간판 촬영</string>
+    <string name="activity_main_camera_landscape_button">관광지 촬영</string>
 </resources>
