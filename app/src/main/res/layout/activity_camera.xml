@@ -38,8 +38,8 @@
         android:id="@+id/activity_camera_take_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:layout_margin="10dp"
         android:padding="15dp"
         android:scaleType="fitCenter"
@@ -49,77 +49,93 @@
         android:id="@+id/activity_camera_location_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_margin="30dp"
-        android:background="@color/colorAccent"
-        android:textColor="#ffffff" />
-
-    <TextView
-        android:id="@+id/activity_camera_light_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_margin="30dp"
         android:background="@color/colorAccent"
         android:textColor="#ffffff" />
 
     <ImageView
+        android:id="@+id/activity_camera_flash_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/activity_camera_light_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_margin="30dp"
+        android:layout_toLeftOf="@id/activity_camera_flash_image"
+        android:background="@color/colorAccent"
+        android:textColor="#ffffff" />
+
+    <ImageView
+        android:id="@+id/activity_camera_list_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:background="@mipmap/ic_launcher" />
+
+    <ImageView
         android:id="@+id/activity_camera_compass"
         android:layout_width="20dp"
         android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
         android:layout_margin="50dp"
         android:contentDescription="@string/activity_camera_compass"
         android:scaleType="fitXY"
         android:src="@drawable/compass" />
+    <!--
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/activity_camera_map_fragment"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true" />
 
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/activity_camera_map_fragment"
-        android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_alignParentBottom="true" />
-
-    <Switch
-        android:id="@+id/activity_camera_map_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"/>
-
+        <Switch
+            android:id="@+id/activity_camera_map_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"/>
+    -->
     <!--오른쪽 벽 -->
     <LinearLayout
-        android:layout_alignParentRight="true"
         android:layout_width="@dimen/black_screen_horizontal_space"
         android:layout_height="match_parent"
-        android:background="#55000000"/>
+        android:layout_alignParentRight="true"
+        android:background="#55000000" />
 
     <!--왼쪽쪽 벽 -->
     <LinearLayout
-        android:layout_alignParentLeft="true"
         android:layout_width="@dimen/black_screen_horizontal_space"
         android:layout_height="match_parent"
-        android:background="#55000000"/>
+        android:layout_alignParentLeft="true"
+        android:background="#55000000" />
 
     <!--상단쪽 벽 -->
     <LinearLayout
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="@dimen/black_screen_vertical_space"
-        android:layout_marginRight="@dimen/black_screen_horizontal_space"
+        android:layout_alignParentTop="true"
         android:layout_marginLeft="@dimen/black_screen_horizontal_space"
-        android:background="#55000000"/>
+        android:layout_marginRight="@dimen/black_screen_horizontal_space"
+        android:background="#55000000" />
     <!--상단쪽 벽 -->
     <LinearLayout
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="@dimen/black_screen_vertical_space"
-        android:layout_marginRight="@dimen/black_screen_horizontal_space"
+        android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/black_screen_horizontal_space"
-        android:background="#55000000"/>
+        android:layout_marginRight="@dimen/black_screen_horizontal_space"
+        android:background="#55000000" />
 
 
 </RelativeLayout>

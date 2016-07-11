@@ -30,7 +30,6 @@ import android.view.animation.Interpolator;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +41,6 @@ import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.SimpleCameraHost;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -66,6 +64,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
+import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
 import static com.namooplus.jejurizmandroid.common.AppSetting.INTERVAL_MAP_REFRESH;
 
 /**
@@ -95,18 +95,19 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private TextView mTxLight;
     private DrawingView mDvDrawingView;
     private List<Camera.Area> mFocusList;
-    private Switch mSwitch;
+    private ImageView mFlash;
+    //private Switch mSwitch;
 
 
     private ProgressDialog mProgressDialog;
-    private MapFragment mapFragment;
+    //private MapFragment mapFragment;
     public static MyCameraHost mMyCameraHost;
 
     private GoogleMap map;
     private Compass mCompass;
     private GpsInfo mGpsInfo;
     private LightInfo mLightInfo;
-
+    private String mFlashMode = FLASH_MODE_OFF;
 
     private float mLightValue;
     private float mCompassValue;
@@ -115,6 +116,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     MarkerOptions mo;
 
     private Timer timer;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,18 +131,22 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mDvDrawingView = (DrawingView) findViewById(R.id.activity_camera_drawingview);
         mTxLocation = (TextView) findViewById(R.id.activity_camera_location_info);
         mTxLight = (TextView) findViewById(R.id.activity_camera_light_info);
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.activity_camera_map_fragment);
+        mFlash = (ImageView) findViewById(R.id.activity_camera_flash_image);
+
+        //mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.activity_camera_map_fragment);
         mCompass = new Compass(this);
         mCompass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
-        mSwitch = (Switch) findViewById(R.id.activity_camera_map_switch);
 
-        mSwitch.setOnCheckedChangeListener(this);
+        //mSwitch = (Switch) findViewById(R.id.activity_camera_map_switch);
+
+        //mSwitch.setOnCheckedChangeListener(this);
         mBtnTakePicture.setOnClickListener(this);
         mTxLocation.setOnClickListener(this);
+        mFlash.setOnClickListener(this);
         mCameraView.setOnTouchListener(this);
 
-        mapFragment.getMapAsync(this);
-        mapFragment.getView().setVisibility(View.GONE);
+        //mapFragment.getMapAsync(this);
+        //mapFragment.getView().setVisibility(View.GONE);
 
         mLightInfo = new LightInfo(this);
 
@@ -155,6 +161,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             mGpsInfo = new GpsInfo(this, locationListener);
             mGpsInfo.initLocation();
         }
+
+
     }
 
     private TimerTask runJob = new TimerTask() {
@@ -176,7 +184,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
-                        if(mMarker != null) {
+                        if (mMarker != null) {
                             mMarker.remove();
                         }
                         mo.position(latlng);
@@ -194,14 +202,14 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
-            case R.id.activity_camera_map_switch:
+            /*case R.id.activity_camera_map_switch:
                 if (isChecked) {
                     mapFragment.getView().setVisibility(View.VISIBLE);
                 } else {
                     mapFragment.getView().setVisibility(View.GONE);
                 }
 
-                break;
+                break;*/
         }
     }
 
@@ -381,6 +389,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.activity_camera_take_button:
                 onTakePicture(v);
                 break;
+            case R.id.activity_camera_flash_image:
+                if (mFlashMode.equals(FLASH_MODE_OFF)) {
+                    mFlashMode = FLASH_MODE_ON;
+                } else {
+                    mFlashMode = FLASH_MODE_OFF;
+                }
         }
     }
 
@@ -469,7 +483,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         super.onStart();
         mCompass.start();
         mLightInfo.start();
-        if(timer == null) {
+        if (timer == null) {
             timer = new Timer();
             timer.schedule(runJob, 0, INTERVAL_MAP_REFRESH);
         }
@@ -514,6 +528,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         public MyCameraHost(Activity activity) {
             super(activity);
             this.activity = activity;
+
         }
 
         @Override
@@ -566,19 +581,18 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         }
 
-
         @Override
         public Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters) {
 
-            if (AppSetting.FLASH_SETTING_VALUE) {
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-            }
+            //if (AppSetting.FLASH_SETTING_VALUE) {
+            parameters.setFlashMode(mFlashMode);
+            //}
 
             return super.adjustPictureParameters(xact, parameters);
         }
 
         public Bitmap loadBitmapFromView(View v) {
-            Bitmap b = Bitmap.createBitmap( v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+            Bitmap b = Bitmap.createBitmap(v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(b);
             v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
             v.draw(c);
