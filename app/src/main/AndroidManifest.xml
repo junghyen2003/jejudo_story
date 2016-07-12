@@ -34,6 +34,8 @@
             android:screenOrientation="landscape" />
         <activity android:name=".ui.MainActivity"/>
 
+        <activity android:name=".ui.CameraListActivity"/>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCFa5-9ZIe9DDg-aEgXkUABb46DtQiBzs0"/>
