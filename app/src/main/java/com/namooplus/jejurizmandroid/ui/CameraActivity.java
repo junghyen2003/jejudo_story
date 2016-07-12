@@ -6,7 +6,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -27,7 +26,6 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,20 +37,13 @@ import com.commonsware.cwac.camera.CameraUtils;
 import com.commonsware.cwac.camera.CameraView;
 import com.commonsware.cwac.camera.PictureTransaction;
 import com.commonsware.cwac.camera.SimpleCameraHost;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.common.AppSetting;
 import com.namooplus.jejurizmandroid.common.Compass;
 import com.namooplus.jejurizmandroid.common.GpsInfo;
 import com.namooplus.jejurizmandroid.common.LightInfo;
-import com.namooplus.jejurizmandroid.view.AfterTakenDailog;
+import com.namooplus.jejurizmandroid.common.Utils;
+import com.namooplus.jejurizmandroid.model.ImageInfoModel;
 import com.namooplus.jejurizmandroid.view.DrawingView;
 
 import java.io.File;
@@ -63,6 +54,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
 import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
@@ -72,8 +67,8 @@ import static com.namooplus.jejurizmandroid.common.AppSetting.INTERVAL_MAP_REFRE
  * Created by HeungSun-AndBut on 2016. 6. 5..
  */
 
-public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
-        View.OnTouchListener, CameraHostProvider, OnMapReadyCallback, CompoundButton.OnCheckedChangeListener {
+public class CameraActivity extends AppCompatActivity implements View.OnTouchListener,
+        CameraHostProvider {
 
     private static final String[] ACTIVITY_CAMERA_PERMISSION = {ACCESS_FINE_LOCATION,
             Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -88,67 +83,64 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     private static final Interpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
     private static final Interpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
 
-    private CameraView mCameraView;
-    private ImageButton mBtnTakePicture;
-    private TextView mTxLocation;
-    private View mVShutter;
-    private TextView mTxLight;
-    private DrawingView mDvDrawingView;
+    @BindView(R.id.activity_camera_take_button)
+    public ImageButton mBtnTakePicture;
+
+    @BindView(R.id.activity_camera_cameraview)
+    public CameraView mCameraView;
+
+    @BindView(R.id.activity_camera_shutter)
+    public View mVShutter;
+
+    @BindView(R.id.activity_camera_drawingview)
+    public DrawingView mDvDrawingView;
+
+    @BindView(R.id.activity_camera_location_info)
+    public TextView mTxLocation;
+
+    @BindView(R.id.activity_camera_light_info)
+    public TextView mTxLight;
+
+    @BindView(R.id.activity_camera_flash_image)
+    public ImageView mFlash;
+
+    @BindView(R.id.activity_camera_list_button)
+    public ImageView mListButton;
+
     private List<Camera.Area> mFocusList;
-    private ImageView mFlash;
-    //private Switch mSwitch;
-
-
-    private ProgressDialog mProgressDialog;
-    //private MapFragment mapFragment;
     public static MyCameraHost mMyCameraHost;
-
-    private GoogleMap map;
     private Compass mCompass;
     private GpsInfo mGpsInfo;
     private LightInfo mLightInfo;
+
     private String mFlashMode = FLASH_MODE_OFF;
 
     private float mLightValue;
     private float mCompassValue;
 
-    private Marker mMarker;
-    MarkerOptions mo;
+    private Timer mTimer;
+    private ArrayList<ImageInfoModel> mImageList;
+    private int imageNum = 0;
+    private boolean isSaveComplete;
+    private int mOrientation;
 
-    private Timer timer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mMyCameraHost = new MyCameraHost(this);
-
         setContentView(R.layout.activity_camera);
 
-        mCameraView = (CameraView) findViewById(R.id.activity_camera_cameraview);
-        mBtnTakePicture = (ImageButton) findViewById(R.id.activity_camera_take_button);
-        mVShutter = findViewById(R.id.activity_camera_shutter);
-        mDvDrawingView = (DrawingView) findViewById(R.id.activity_camera_drawingview);
-        mTxLocation = (TextView) findViewById(R.id.activity_camera_location_info);
-        mTxLight = (TextView) findViewById(R.id.activity_camera_light_info);
-        mFlash = (ImageView) findViewById(R.id.activity_camera_flash_image);
+        ButterKnife.bind(CameraActivity.this);
 
-        //mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.activity_camera_map_fragment);
         mCompass = new Compass(this);
+        mLightInfo = new LightInfo(this);
+
         mCompass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
 
-        //mSwitch = (Switch) findViewById(R.id.activity_camera_map_switch);
 
-        //mSwitch.setOnCheckedChangeListener(this);
-        mBtnTakePicture.setOnClickListener(this);
-        mTxLocation.setOnClickListener(this);
-        mFlash.setOnClickListener(this);
-        mCameraView.setOnTouchListener(this);
-
-        //mapFragment.getMapAsync(this);
-        //mapFragment.getView().setVisibility(View.GONE);
-
-        mLightInfo = new LightInfo(this);
+        mImageList = new ArrayList<>();
 
         //마쉬멜로우 권한 확인
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
@@ -161,8 +153,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             mGpsInfo = new GpsInfo(this, locationListener);
             mGpsInfo.initLocation();
         }
-
-
     }
 
     private TimerTask runJob = new TimerTask() {
@@ -172,46 +162,18 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 public void run() {
                     mLightValue = mLightInfo.getmLightValue();
                     mCompassValue = mCompass.getDirection();
-                    LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
-
-                    if (map != null) {
-                        CameraPosition cameraPosition = new CameraPosition.Builder()
-                                .target(latlng)             // Sets the center of the map to current location
-                                .zoom(17)                   // Sets the zoom
-                                .bearing(mCompass.getDirection()) // Sets the orientation of the camera to east
-                                .tilt(0)                   // Sets the tilt of the camera to 0 degrees
-                                .build();                   // Creates a CameraPosition from the builder
-                        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-
-                        if (mMarker != null) {
-                            mMarker.remove();
-                        }
-                        mo.position(latlng);
-                        mMarker = map.addMarker(mo);
-                    }
+                    //LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
 
                     mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
                     mTxLight.setText("조도:" + mLightValue);
+                    mOrientation = getResources().getConfiguration().orientation;
+                    Log.i("HS","방향 : " + mOrientation);
+
 
                 }
             });
         }
     };
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        switch (buttonView.getId()) {
-            /*case R.id.activity_camera_map_switch:
-                if (isChecked) {
-                    mapFragment.getView().setVisibility(View.VISIBLE);
-                } else {
-                    mapFragment.getView().setVisibility(View.GONE);
-                }
-
-                break;*/
-        }
-    }
 
     //위치 값 리스너
     private LocationListener locationListener = new LocationListener() {
@@ -233,7 +195,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         public void onProviderDisabled(String provider) {
         }
     };
-
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode) {
@@ -261,7 +222,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             }
 
             //카메라 권한
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED && permissions[0].equals(ACCESS_FINE_LOCATION)) {
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
                         Toast.LENGTH_SHORT).show();
                 finish();
@@ -283,27 +244,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                         Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        try {
-            map = googleMap;
-            map.setMyLocationEnabled(false);
-
-            map.getUiSettings().setCompassEnabled(false);
-
-            LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17));
-
-            mo = new MarkerOptions();
-            mo.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
-            mo.position(latlng);
-            mMarker = map.addMarker(mo);
-
-        } catch (SecurityException e) {
-            Log.i("HS", "onMapReady " + e.getMessage());
         }
     }
 
@@ -383,27 +323,38 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.activity_camera_take_button:
-                onTakePicture(v);
-                break;
-            case R.id.activity_camera_flash_image:
-                if (mFlashMode.equals(FLASH_MODE_OFF)) {
-                    mFlashMode = FLASH_MODE_ON;
-                } else {
-                    mFlashMode = FLASH_MODE_OFF;
-                }
+    @OnClick(R.id.activity_camera_take_button)
+    public void takeCameraClick(View v) {
+        onTakePicture(v);
+    }
+
+    @OnClick(R.id.activity_camera_flash_image)
+    public void flashClick(View v) {
+        if (mFlashMode.equals(FLASH_MODE_OFF)) {
+            mFlashMode = FLASH_MODE_ON;
+        } else {
+            mFlashMode = FLASH_MODE_OFF;
         }
     }
+
+    @OnClick(R.id.activity_camera_list_button)
+    public void listCameraClick(View v) {
+        if(isSaveComplete) {
+            Intent i = new Intent(CameraActivity.this, CameraListActivity.class);
+            i.putParcelableArrayListExtra("datas", mImageList);
+            startActivity(i);
+            init();
+        } else {
+            Toast.makeText(this, "이미지 저장중입니다. 다시 한번 시도하세요",Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void takePicture() {
         try {
             mCameraView.takePicture(false, true);
             mBtnTakePicture.setEnabled(false);
             animateShutter();
-            setProgress(true);
         } catch (IllegalStateException ex) {
             Toast.makeText(CameraActivity.this, "사진찍기 에러 : " + ex.toString(), Toast.LENGTH_SHORT).show();
         }
@@ -418,26 +369,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             takePicture();
         }
 
-    }
-
-    private void setProgress(boolean show) {
-//        if (show) {
-//            if (mProgressDialog == null) {
-//                mProgressDialog = new ProgressDialog(CameraActivity.this);
-//            } else if(mProgressDialog.isShowing()) {
-//                return;
-//            }
-//
-//            mProgressDialog.setMessage(getString(R.string.activity_camera_progress));
-//            mProgressDialog.setIndeterminate(true);
-//            mProgressDialog.setCancelable(false);
-//            mProgressDialog.show();
-//        } else {
-//            if (mProgressDialog != null && mProgressDialog.isShowing()) {
-//                mProgressDialog.dismiss();
-//                mProgressDialog = null;
-//            }
-//        }
     }
 
     private void animateShutter() {
@@ -464,6 +395,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         animatorSet.start();
     }
 
+    private void init() {
+        imageNum = 0;
+        mImageList.clear();
+        isSaveComplete = false;
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         switch (v.getId()) {
@@ -483,11 +420,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         super.onStart();
         mCompass.start();
         mLightInfo.start();
-        if (timer == null) {
-            timer = new Timer();
-            timer.schedule(runJob, 0, INTERVAL_MAP_REFRESH);
+        if (mTimer == null) {
+            mTimer = new Timer();
+            mTimer.schedule(runJob, 0, INTERVAL_MAP_REFRESH);
         }
-
     }
 
     @Override
@@ -583,10 +519,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         public Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters) {
-
-            //if (AppSetting.FLASH_SETTING_VALUE) {
             parameters.setFlashMode(mFlashMode);
-            //}
 
             return super.adjustPictureParameters(xact, parameters);
         }
@@ -602,31 +535,32 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         public void saveImage(PictureTransaction xact, byte[] image) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-
             try {
-                setProgress(false);
-                AfterTakenDailog afterDialog = AfterTakenDailog.newInstance(bitmap
-                        , mLightValue, mCompassValue, mCurrentLat, mCurrentLon);
-                afterDialog.show(getSupportFragmentManager(), "afterTaken");
+                String path = Utils.saveBitmapToFile(bitmap, imageNum++);
+
+                if (!path.isEmpty()) {
+                    mImageList.add(new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue, mCompassValue, mOrientation));
+                }
 
                 CameraActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        //TODO 이미지가 저장하는 시간이 걸리는데 이것을 어떻게 처리 할지 고민을 해야함.
                         mBtnTakePicture.setEnabled(true);
                     }
                 });
+
+                isSaveComplete = true;
+
             } catch (Exception e) {
                 handleException(e);
-
                 e.printStackTrace();
             }
-
         }
 
         @Override
         public void onAutoFocus(boolean success, Camera camera) {
             try {
-
                 // 터치해서 포커스 잡는 경우
                 if (mFocusList != null) {
                     Camera.Parameters param = camera.getParameters();
@@ -645,13 +579,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                     //  super.onAutoFocus(success, camera);
                     takePicture();
                 }
-
-
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
-
         }
 
         private class SizeComparator implements
@@ -666,13 +596,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 } else if (left > right) {
                     return (1);
                 }
-
                 return (0);
             }
-
-
         }
-
     }
-
 }

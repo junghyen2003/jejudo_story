@@ -4,6 +4,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
 
     <dimen name="black_screen_vertical_space">60dp</dimen>
-    <dimen name="black_screen_horizontal_space">0dp</dimen>
+    <dimen name="black_screen_horizontal_space">80dp</dimen>
 
 </resources>

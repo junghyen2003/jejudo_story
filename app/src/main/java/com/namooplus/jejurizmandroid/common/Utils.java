@@ -5,6 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.os.Environment;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
+import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_PATH;
+import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_TEMP_PATH;
 
 /**
  * Created by HeungSun-AndBut on 2016. 6. 5..
@@ -57,5 +64,45 @@ public class Utils {
         return false;
     }
 
+    public static String saveBitmapToFile(Bitmap mBit, int num) {
+        Log.i("HS", "start");
+        FileOutputStream fos = null;
+        File file = null;
+        try {
+            File dir = new File(SAVE_IMAGE_TEMP_PATH);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            file = new File(SAVE_IMAGE_PATH + num + ".jpg");
+            if (file.exists()) {
+                file.delete();
+            }
+
+            fos = new FileOutputStream(file);
+
+            mBit.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+            fos.flush();
+
+        } catch (final Exception e) {
+
+        } finally {
+            try {
+                mBit.recycle();
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (final Exception e) {
+            }
+        }
+        Log.i("HS", "end");
+        if (file != null) {
+            return file.getAbsolutePath();
+        } else {
+            return null;
+        }
+
+    }
 
 }

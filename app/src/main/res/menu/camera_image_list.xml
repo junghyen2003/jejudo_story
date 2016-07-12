@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:context=".MainTabActivity" >
+
+    <item
+        android:id="@+id/menu1"
+        android:icon="@mipmap/ic_launcher"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:title="menu1"/>
+
+    <item
+        android:id="@+id/menu2"
+        android:icon="@mipmap/ic_launcher"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:title="menu2"/>
+
+
+</menu>
+
