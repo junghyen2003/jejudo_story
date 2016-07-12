@@ -332,8 +332,11 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
     public void flashClick(View v) {
         if (mFlashMode.equals(FLASH_MODE_OFF)) {
             mFlashMode = FLASH_MODE_ON;
+            mFlash.setImageResource(R.drawable.ic_flash_on_white_24dp);
+
         } else {
             mFlashMode = FLASH_MODE_OFF;
+            mFlash.setImageResource(R.drawable.ic_flash_off_white_24dp);
         }
     }
 
