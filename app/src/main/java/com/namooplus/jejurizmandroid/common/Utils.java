@@ -8,7 +8,10 @@ import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_PATH;
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_TEMP_PATH;
@@ -103,6 +106,42 @@ public class Utils {
             return null;
         }
 
+    }
+
+    public static void copyFile(File src, File dst) throws IOException
+    {
+        FileChannel inChannel = new FileInputStream(src).getChannel();
+        FileChannel outChannel = new FileOutputStream(dst).getChannel();
+        try
+        {
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        }
+        finally
+        {
+            if (inChannel != null)
+                inChannel.close();
+            if (outChannel != null)
+                outChannel.close();
+        }
+    }
+
+    public static void deleteDir(File filePath) {
+        try {
+            if (filePath.isDirectory()) {
+                // listFiles() may return null when I/O error (ex. Permission not allowed)
+                if (filePath.listFiles() != null) {
+                    // If directory, traverse down the directory
+                    for (File fileDelete : filePath.listFiles()) {
+                        deleteDir(fileDelete);
+                    }
+                    filePath.delete();
+                }
+            } else {
+                //if file, then delete it
+                filePath.delete();
+            }
+        } catch (Exception e) {
+        }
     }
 
 }

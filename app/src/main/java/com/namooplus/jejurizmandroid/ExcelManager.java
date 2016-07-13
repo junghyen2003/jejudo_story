@@ -3,9 +3,7 @@ package com.namooplus.jejurizmandroid;
 import android.os.Environment;
 import android.util.Log;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -19,7 +17,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_EXCEL_PATH;
 
@@ -29,11 +26,11 @@ import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_EXCEL_PATH;
 
 public class ExcelManager {
 
-    private final static String EXCEL_FILE_NAME = "CAMERA_INFOMATION_DATA.xls";
+    //private final static String EXCEL_FILE_NAME = "CAMERA_INFOMATION_DATA.xls";
 
 
     private static ExcelManager instance;
-    private File mExcelFile;
+    private File mExcelDir;
     private int mLastRowNum = 0;
 
     public static ExcelManager getInstance() {
@@ -52,22 +49,30 @@ public class ExcelManager {
         }
 
         //엑셀 파일 생성
-        mExcelFile = new File(SAVE_EXCEL_PATH, EXCEL_FILE_NAME);
+        mExcelDir = new File(SAVE_EXCEL_PATH);
 
         //기존 엑셀 파일이 있는지 있으면 해당 줄만큼 들고오기
-        if (mExcelFile.exists()) {
-            readExcelFile();
-        }
-
-        //최초일경우 첫줄 정의
-        if (mLastRowNum == 0) {
-            initExcelFile();
+        if (!mExcelDir.exists()) {
+            mExcelDir.mkdir();
         }
 
     }
 
+    public File createExcelFile(String fileName) {
+        File mExcelFile = new File(mExcelDir, fileName);
 
-    public void readExcelFile() {
+        if(mExcelFile.exists()) {
+            mExcelFile.delete();
+        }
+
+        //최초일경우 첫줄 정의
+        initExcelFile(mExcelFile);
+
+        return mExcelFile;
+    }
+
+
+    /*public void readExcelFile() {
         try {
             FileInputStream myInput = new FileInputStream(mExcelFile);
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
@@ -77,7 +82,6 @@ public class ExcelManager {
 
                 mLastRowNum = mySheet.getLastRowNum();
 
-                /** We now need something to iterate through the cells. **/
                 Iterator rowIter = mySheet.rowIterator();
 
                 while (rowIter.hasNext()) {
@@ -94,9 +98,9 @@ public class ExcelManager {
         }
 
         return;
-    }
+    }*/
 
-    private void initExcelFile() {
+    private void initExcelFile(File excelFile) {
         FileOutputStream os = null;
         try {
             // New Workbook
@@ -140,10 +144,10 @@ public class ExcelManager {
             c.setCellValue("경도");
             c.setCellStyle(cs);
 
-            os = new FileOutputStream(mExcelFile);
+            os = new FileOutputStream(excelFile);
             myWorkBook.write(os);
         } catch (IOException e) {
-            Log.w("FileUtils", "Error writing " + mExcelFile, e);
+            Log.w("FileUtils", "Error writing " + excelFile, e);
         } catch (Exception e) {
             Log.w("FileUtils", "Failed to save file", e);
         } finally {
@@ -156,13 +160,13 @@ public class ExcelManager {
         }
     }
 
-    public void saveExcelFile(String path, String mTitle, float bright, float direction, double lat, double lon) {
+    public void saveExcelFile(File excelFile,String imagePath,  String mTitle, float bright, float direction, double lat, double lon) {
         FileOutputStream os = null;
         Cell c = null;
         try {
             //기존 엑셀 파일 writer 셋팅
             // Creating Input Stream
-            FileInputStream myInput = new FileInputStream(mExcelFile);
+            FileInputStream myInput = new FileInputStream(excelFile);
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
             HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
 
@@ -177,7 +181,7 @@ public class ExcelManager {
             c.setCellValue(mTitle);
 
             c = row.createCell(1);
-            c.setCellValue(path);
+            c.setCellValue(imagePath);
 
             c = row.createCell(2);
             c.setCellValue(bright);
@@ -191,11 +195,11 @@ public class ExcelManager {
             c = row.createCell(5);
             c.setCellValue(lon);
 
-            os = new FileOutputStream(mExcelFile);
+            os = new FileOutputStream(excelFile);
             myWorkBook.write(os);
 
         } catch (IOException e) {
-            Log.w("FileUtils", "Error writing " + mExcelFile, e);
+            Log.w("FileUtils", "Error writing " + excelFile, e);
         } catch (Exception e) {
             Log.w("FileUtils", "Failed to save file", e);
         } finally {

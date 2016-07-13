@@ -39,11 +39,14 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/activity_camera_image_view"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="2" />
+                    android:layout_weight="2"
+                    android:scaleType="centerCrop"/>
 
                 <MapFragment
+                    android:id="@+id/activity_camera_image_map"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="2" />
@@ -54,6 +57,7 @@
                     android:layout_weight="1">
 
                     <EditText
+                        android:id="@+id/activity_camera_image_edit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
@@ -69,12 +73,14 @@
                         android:orientation="horizontal">
 
                         <Button
+                            android:id="@+id/activity_camera_image_confirm"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="30dp"
                             android:text="확인" />
 
                         <Button
+                            android:id="@+id/activity_camera_image_cancle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="취소" />
