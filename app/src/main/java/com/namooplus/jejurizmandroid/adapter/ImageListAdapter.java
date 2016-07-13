@@ -76,7 +76,7 @@ public class ImageListAdapter extends BaseAdapter {
         }
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 8;
+        options.inSampleSize = 16;
 
         ivImage.setImageBitmap(BitmapFactory.decodeFile(item.getFilePath(), options));
         tvLat.setText("위도 : " + item.getLatitude());

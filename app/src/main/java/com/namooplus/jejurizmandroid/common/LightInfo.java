@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import java.text.DecimalFormat;
 
@@ -24,7 +25,7 @@ public class LightInfo implements SensorEventListener {
     }
 
     public void start() {
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_GAME);
     }
 
     public void stop() {
@@ -33,8 +34,10 @@ public class LightInfo implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Log.i("HS","onSensorChanged");
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             mLightValue = event.values[0];
+            Log.i("HS","LightValue : " + mLightValue);
             DecimalFormat format = new DecimalFormat(".##");
         }
     }

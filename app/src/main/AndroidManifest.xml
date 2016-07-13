@@ -35,6 +35,7 @@
         <activity android:name=".ui.MainActivity"/>
 
         <activity android:name=".ui.CameraListActivity"/>
+        <activity android:name=".ui.ImageDetailActivity"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

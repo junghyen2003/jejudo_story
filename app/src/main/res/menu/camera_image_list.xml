@@ -6,13 +6,13 @@
 
     <item
         android:id="@+id/menu1"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_add_a_photo_white_24dp"
         app:showAsAction="ifRoom|collapseActionView"
         android:title="menu1"/>
 
     <item
         android:id="@+id/menu2"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_edit_white_24dp"
         app:showAsAction="ifRoom|collapseActionView"
         android:title="menu2"/>
 

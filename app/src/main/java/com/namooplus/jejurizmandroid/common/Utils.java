@@ -7,11 +7,14 @@ import android.media.ExifInterface;
 import android.os.Environment;
 import android.util.Log;
 
+import com.namooplus.jejurizmandroid.model.ImageInfoModel;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_PATH;
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_TEMP_PATH;
@@ -67,8 +70,33 @@ public class Utils {
         return false;
     }
 
+    public static String saveByteToFile(byte[] image, int num) {
+        File file = null;
+        FileOutputStream fos = null;
+        try {
+            File dir = new File(SAVE_IMAGE_TEMP_PATH);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            file = new File(SAVE_IMAGE_PATH + num + ".jpg");
+            if (file.exists()) {
+                file.delete();
+            }
+
+
+            fos = new FileOutputStream(file);
+
+            fos.write(image);
+            fos.close();
+        } catch (java.io.IOException e) {
+            Log.e("PictureDemo", "Exception in photoCallback", e);
+        }
+
+        return file.getAbsolutePath();
+    }
+
     public static String saveBitmapToFile(Bitmap mBit, int num) {
-        Log.i("HS", "start");
         FileOutputStream fos = null;
         File file = null;
         try {
@@ -99,7 +127,6 @@ public class Utils {
             } catch (final Exception e) {
             }
         }
-        Log.i("HS", "end");
         if (file != null) {
             return file.getAbsolutePath();
         } else {
@@ -108,16 +135,12 @@ public class Utils {
 
     }
 
-    public static void copyFile(File src, File dst) throws IOException
-    {
+    public static void copyFile(File src, File dst) throws IOException {
         FileChannel inChannel = new FileInputStream(src).getChannel();
         FileChannel outChannel = new FileOutputStream(dst).getChannel();
-        try
-        {
+        try {
             inChannel.transferTo(0, inChannel.size(), outChannel);
-        }
-        finally
-        {
+        } finally {
             if (inChannel != null)
                 inChannel.close();
             if (outChannel != null)
@@ -144,4 +167,17 @@ public class Utils {
         }
     }
 
+    public static String getNanoToMilllisecond(long nanoTime) {
+        return nanoTime / 1000000.0 + "ms";
+    }
+
+    public static void deleteFile(ArrayList<ImageInfoModel> list) {
+        File file = null;
+        for(ImageInfoModel item : list) {
+            file = new File(item.getFilePath());
+            if(file.exists()) {
+                file.delete();
+            }
+        }
+    }
 }

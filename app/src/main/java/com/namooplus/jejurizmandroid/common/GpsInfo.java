@@ -89,7 +89,6 @@ public class GpsInfo {
                         }
                     }
                 }
-                Log.d("HS", "gps setting out");
             }
         } catch (SecurityException e) {
             Log.i("HS", "e : " + e.toString());

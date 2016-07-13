@@ -6,10 +6,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -51,8 +52,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,7 +60,7 @@ import butterknife.OnClick;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
 import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
-import static com.namooplus.jejurizmandroid.common.AppSetting.INTERVAL_MAP_REFRESH;
+import static com.namooplus.jejurizmandroid.common.AppSetting.ACTIVITY_CODE_CAMERA_LIST;
 
 /**
  * Created by HeungSun-AndBut on 2016. 6. 5..
@@ -69,6 +68,7 @@ import static com.namooplus.jejurizmandroid.common.AppSetting.INTERVAL_MAP_REFRE
 
 public class CameraActivity extends AppCompatActivity implements View.OnTouchListener,
         CameraHostProvider {
+
 
     private static final String[] ACTIVITY_CAMERA_PERMISSION = {ACCESS_FINE_LOCATION,
             Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -118,12 +118,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
     private float mLightValue;
     private float mCompassValue;
 
-    private Timer mTimer;
     private ArrayList<ImageInfoModel> mImageList;
-    private int imageNum = 0;
     private boolean isSaveComplete;
     private int mOrientation;
-
+    private boolean isRunJob;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -136,11 +134,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
 
         mCompass = new Compass(this);
         mLightInfo = new LightInfo(this);
-
-        mCompass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
-
-
         mImageList = new ArrayList<>();
+        mCompass.arrowView = (ImageView) findViewById(R.id.activity_camera_compass);
 
         //마쉬멜로우 권한 확인
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
@@ -155,25 +150,59 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
         }
     }
 
-    private TimerTask runJob = new TimerTask() {
-        public void run() {
-            CameraActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mLightValue = mLightInfo.getmLightValue();
-                    mCompassValue = mCompass.getDirection();
-                    //LatLng latlng = new LatLng(mCurrentLat, mCurrentLon);
-
-                    mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
-                    mTxLight.setText("조도:" + mLightValue);
-                    mOrientation = getResources().getConfiguration().orientation;
-                    Log.i("HS","방향 : " + mOrientation);
-
-
-                }
-            });
+    @Override
+    public void onBackPressed() {
+        if(mImageList.isEmpty()) {
+            super.onBackPressed();
+        } else {
+            checkDialog();
         }
-    };
+    }
+
+    private void checkDialog() {
+        AlertDialog.Builder db = new AlertDialog.Builder(this);
+        db.setTitle("저장된 사진이 있습니다.")
+                .setMessage("계속하시면 삭제됩니다.")
+                .setCancelable(true)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Utils.deleteFile(mImageList);
+                        finish(); //확인버튼 누루면 앱 종료
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+
+    private void loopJob() {
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                while (isRunJob) {
+                    try {
+                        Thread.sleep(2000);
+                        timerJob();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }.start();
+    }
+
+    private void timerJob() {
+        CameraActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLightValue = mLightInfo.getmLightValue();
+                mCompassValue = mCompass.getDirection();
+                mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+                mTxLight.setText("조도:" + mLightValue);
+                mOrientation = getResources().getConfiguration().orientation;
+            }
+        });
+    }
 
     //위치 값 리스너
     private LocationListener locationListener = new LocationListener() {
@@ -200,9 +229,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
     public void startActivityForResult(Intent intent, int requestCode) {
         super.startActivityForResult(intent, requestCode);
         switch (requestCode) {
-            case RESULT_OK:
-                mGpsInfo = new GpsInfo(this, locationListener);
-                mGpsInfo.initLocation();
+            case ACTIVITY_CODE_CAMERA_LIST:
+                //앞 페이지에서 이미지를 삭제 할수도있다. 그래서 리스트 재 구성
+                mImageList.clear();
+                ArrayList<ImageInfoModel> list = intent.getParcelableArrayListExtra("datas");
+                Log.i("HS","list count : " + list.size());
+                mImageList.addAll(list);
                 break;
         }
     }
@@ -216,9 +248,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
                         Toast.LENGTH_SHORT).show();
                 finish();
-            } else {
-                mGpsInfo = new GpsInfo(this, locationListener);
-                mGpsInfo.initLocation();
             }
 
             //카메라 권한
@@ -226,9 +255,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
                 Toast.makeText(this, getResources().getString(R.string.activity_camera_location_permission),
                         Toast.LENGTH_SHORT).show();
                 finish();
-            } else {
-                mGpsInfo = new GpsInfo(this, locationListener);
-                mGpsInfo.initLocation();
             }
 
             //파일 쓰기 권한
@@ -244,6 +270,9 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
                         Toast.LENGTH_SHORT).show();
                 finish();
             }
+
+            mGpsInfo = new GpsInfo(this, locationListener);
+            mGpsInfo.initLocation();
         }
     }
 
@@ -333,7 +362,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
         if (mFlashMode.equals(FLASH_MODE_OFF)) {
             mFlashMode = FLASH_MODE_ON;
             mFlash.setImageResource(R.drawable.ic_flash_on_white_24dp);
-
         } else {
             mFlashMode = FLASH_MODE_OFF;
             mFlash.setImageResource(R.drawable.ic_flash_off_white_24dp);
@@ -342,16 +370,14 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
 
     @OnClick(R.id.activity_camera_list_button)
     public void listCameraClick(View v) {
-        if(isSaveComplete) {
+        if (isSaveComplete) {
             Intent i = new Intent(CameraActivity.this, CameraListActivity.class);
             i.putParcelableArrayListExtra("datas", mImageList);
-            startActivity(i);
-            init();
+            startActivityForResult(i, ACTIVITY_CODE_CAMERA_LIST);
         } else {
-            Toast.makeText(this, "이미지 저장중입니다. 다시 한번 시도하세요",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "이미지 저장중입니다. 다시 한번 시도하세요", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private void takePicture() {
         try {
@@ -371,7 +397,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
         } else {
             takePicture();
         }
-
     }
 
     private void animateShutter() {
@@ -398,12 +423,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
         animatorSet.start();
     }
 
-    private void init() {
-        imageNum = 0;
-        mImageList.clear();
-        isSaveComplete = false;
-    }
-
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         switch (v.getId()) {
@@ -423,33 +442,29 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
         super.onStart();
         mCompass.start();
         mLightInfo.start();
-        if (mTimer == null) {
-            mTimer = new Timer();
-            mTimer.schedule(runJob, 0, INTERVAL_MAP_REFRESH);
-        }
+        isRunJob = true;
+        loopJob();
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mCompass.stop();
-        mLightInfo.stop();
         mCameraView.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mCompass.start();
-        mLightInfo.start();
         mCameraView.onResume();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mLightInfo.stop();
         mCompass.stop();
+        mLightInfo.stop();
+        isRunJob = false;
     }
 
 
@@ -493,37 +508,28 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
             if (bestPictureSize == null) {
                 bestPictureSize = getBestPictureSize(parameters);
             }
-
             return bestPictureSize;
-
         }
 
         //사진 결과물 사이즈 조정
         private Camera.Size getBestPictureSize(Camera.Parameters parameters) {
             Camera.Size result;
             List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
-
             result = CameraUtils.getLargestPictureSize(this, parameters, false);
-
             Collections.sort(sizes, Collections.reverseOrder(new SizeComparator()));
             for (Camera.Size entry : sizes) {
-
                 if (entry.height == 1080 || entry.width == 1920) {
                     result = entry;
                 } else {
                     break;
                 }
-
             }
-
             return result;
-
         }
 
         @Override
         public Camera.Parameters adjustPictureParameters(PictureTransaction xact, Camera.Parameters parameters) {
             parameters.setFlashMode(mFlashMode);
-
             return super.adjustPictureParameters(xact, parameters);
         }
 
@@ -537,9 +543,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
 
         @Override
         public void saveImage(PictureTransaction xact, byte[] image) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
             try {
-                String path = Utils.saveBitmapToFile(bitmap, imageNum++);
+                String path = Utils.saveByteToFile(image, mImageList.size());
 
                 if (!path.isEmpty()) {
                     mImageList.add(new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue, mCompassValue, mOrientation));
@@ -548,13 +553,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
                 CameraActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //TODO 이미지가 저장하는 시간이 걸리는데 이것을 어떻게 처리 할지 고민을 해야함.
                         mBtnTakePicture.setEnabled(true);
+                        isSaveComplete = true;
                     }
                 });
-
-                isSaveComplete = true;
-
             } catch (Exception e) {
                 handleException(e);
                 e.printStackTrace();

@@ -24,7 +24,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.namooplus.jejurizmandroid.ExcelManager;
 import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.common.PreferenceManager;
 
@@ -223,8 +222,8 @@ public class AfterTakenDailog extends DialogFragment {
                                 public void run() {
                                     Toast.makeText(getActivity(), R.string.dialog_after_taken_dialog_save, Toast.LENGTH_SHORT).show();
                                     //엑셀에 저장
-                                    ExcelManager.getInstance().saveExcelFile(file.getAbsolutePath(), mTitle,
-                                            mBright, mCompass, mLat, mLon);
+                                    //ExcelManager.getInstance().saveExcelFile(file.getAbsolutePath(), mTitle,
+                                      //      mBright, mCompass, mLat, mLon);
                                     mPreferenceManager.saveImageTitle(mTitle);
                                     dismiss();
                                 }

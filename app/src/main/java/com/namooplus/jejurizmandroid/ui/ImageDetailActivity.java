@@ -85,6 +85,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
         mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.activity_camera_image_map);
 
         setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setTitle("GPS 확인 및 제목 입력");
 

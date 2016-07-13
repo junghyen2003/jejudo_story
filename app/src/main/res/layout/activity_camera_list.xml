@@ -32,19 +32,50 @@
 
             </android.support.design.widget.AppBarLayout>
 
-            <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/activity_camera_list_grid_view"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="?attr/actionBarSize"
-                android:background="@android:color/white"
-                android:horizontalSpacing="1dp"
-                android:verticalSpacing="1dp"
-                android:numColumns="2" />
+                android:layout_marginTop="?attr/actionBarSize">
+
+                <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/activity_camera_list_grid_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:background="@android:color/white"
+                    android:horizontalSpacing="1dp"
+                    android:numColumns="2"
+                    android:verticalSpacing="1dp" />
+
+                <LinearLayout
+                    android:id="@+id/activity_camera_list_bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <Button
+                        android:id="@+id/activity_camera_list_button_ok"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_margin="5dp"
+                        android:text="확인" />
+
+                    <Button
+                        android:id="@+id/activity_camera_list_button_cancle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_margin="5dp"
+                        android:text="취소" />
+
+                </LinearLayout>
+            </RelativeLayout>
 
         </android.support.design.widget.CoordinatorLayout>
     </FrameLayout>
-
 
 
 </android.support.v4.widget.DrawerLayout>

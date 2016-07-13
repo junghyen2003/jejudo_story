@@ -45,11 +45,17 @@
                     android:layout_weight="2"
                     android:scaleType="centerCrop"/>
 
-                <MapFragment
-                    android:id="@+id/activity_camera_image_map"
+                <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/activity_camera_map_fragment"
+                    android:name="com.google.android.gms.maps.MapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="2" />
+                    android:layout_weight="2"
+                    android:layout_alignParentBottom="true" />
+
+                <MapFragment
+                    android:id="@+id/activity_camera_image_map"
+                    />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
