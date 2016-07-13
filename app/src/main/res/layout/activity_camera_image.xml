@@ -43,19 +43,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="2"
-                    android:scaleType="centerCrop"/>
+                    android:scaleType="centerCrop" />
 
                 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
                     android:id="@+id/activity_camera_map_fragment"
                     android:name="com.google.android.gms.maps.MapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="2"
-                    android:layout_alignParentBottom="true" />
+                    android:layout_alignParentBottom="true"
+                    android:layout_weight="2" />
 
-                <MapFragment
-                    android:id="@+id/activity_camera_image_map"
-                    />
+                <MapFragment android:id="@+id/activity_camera_image_map" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -66,9 +64,9 @@
                         android:id="@+id/activity_camera_image_edit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
                         android:layout_alignParentTop="true"
                         android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
                         android:hint="제목을 입력하세요" />
 
                     <LinearLayout

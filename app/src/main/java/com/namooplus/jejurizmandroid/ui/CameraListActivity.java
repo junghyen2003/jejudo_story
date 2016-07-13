@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.namooplus.jejurizmandroid.R;
@@ -50,7 +51,6 @@ public class CameraListActivity extends AppCompatActivity {
     @BindView(R.id.activity_camera_list_button_cancle)
     public Button mBtnCancle;
 
-
     private ArrayList<ImageInfoModel> mImageList;
     private ImageListAdapter mAdapter;
 
@@ -70,18 +70,24 @@ public class CameraListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setTitle("사진 정보 편집");
 
-        mAdapter = new ImageListAdapter(mImageList, this);
+        initGridSetting();
+    }
 
-        mGridView.setAdapter(mAdapter);
-
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    private void initGridSetting() {
+        new Thread() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                Log.i("HS", "onItemClick : " + position);
+            public void run() {
+                super.run();
+                mAdapter = new ImageListAdapter(mImageList, CameraListActivity.this);
+                mGridView.setAdapter(mAdapter);
+                mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Log.i("HS", "onItemClick : " + position);
+                    }
+                });
             }
-        });
-
+        }.start();
     }
 
     @Override

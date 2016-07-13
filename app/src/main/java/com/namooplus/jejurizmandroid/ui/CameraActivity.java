@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -152,7 +151,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
 
     @Override
     public void onBackPressed() {
-        if(mImageList.isEmpty()) {
+        if (mImageList.isEmpty()) {
             super.onBackPressed();
         } else {
             checkDialog();
@@ -226,15 +225,19 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
     };
 
     @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
-        super.startActivityForResult(intent, requestCode);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case ACTIVITY_CODE_CAMERA_LIST:
                 //앞 페이지에서 이미지를 삭제 할수도있다. 그래서 리스트 재 구성
                 mImageList.clear();
-                ArrayList<ImageInfoModel> list = intent.getParcelableArrayListExtra("datas");
-                Log.i("HS","list count : " + list.size());
-                mImageList.addAll(list);
+                if (data != null) {
+                    ArrayList<ImageInfoModel> list = data.getParcelableArrayListExtra("datas");
+                    if (!list.isEmpty()) {
+                        mImageList.addAll(list);
+                    }
+                }
+
                 break;
         }
     }
@@ -370,12 +373,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
 
     @OnClick(R.id.activity_camera_list_button)
     public void listCameraClick(View v) {
-        if (isSaveComplete) {
+        if (isSaveComplete && !mImageList.isEmpty()) {
             Intent i = new Intent(CameraActivity.this, CameraListActivity.class);
             i.putParcelableArrayListExtra("datas", mImageList);
             startActivityForResult(i, ACTIVITY_CODE_CAMERA_LIST);
         } else {
-            Toast.makeText(this, "이미지 저장중입니다. 다시 한번 시도하세요", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "다시 한번 시도하세요", Toast.LENGTH_SHORT).show();
         }
     }
 

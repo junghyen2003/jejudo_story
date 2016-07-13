@@ -53,6 +53,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:orientation="horizontal"
+                    android:background="#ffffff"
                     android:visibility="gone">
 
                     <Button
