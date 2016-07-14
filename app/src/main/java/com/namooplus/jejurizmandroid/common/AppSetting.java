@@ -8,6 +8,7 @@ import android.os.Environment;
 
 public class AppSetting {
     public final static int ACTIVITY_CODE_CAMERA_LIST = 52;
+    public final static int ACTIVITY_CODE_IMAGE_DETAIL = 59;
 
     public static final String SAVE_IMAGE_PATH = Environment.getExternalStorageDirectory() + "/namooplus/images/";
     public static final String SAVE_EXCEL_PATH = Environment.getExternalStorageDirectory() + "/namooplus/";

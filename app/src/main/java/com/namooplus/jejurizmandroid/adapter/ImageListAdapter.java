@@ -3,11 +3,10 @@ package com.namooplus.jejurizmandroid.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,23 +26,14 @@ public class ImageListAdapter extends BaseAdapter {
     public TextView tvLong;
     public TextView tvLight;
     public TextView tvDir;
-    public CheckBox chCheck;
+    public ImageView chCheck;
 
-    private boolean checkBoxMode = false;
     private List<ImageInfoModel> imageModels;
     private Context context;
 
     public ImageListAdapter(List<ImageInfoModel> imageModels, Context context) {
         this.imageModels = imageModels;
         this.context = context;
-    }
-
-    public void setCheckBoxMode(boolean checkBoxMode) {
-        this.checkBoxMode = checkBoxMode;
-    }
-
-    public boolean isCheckBoxMode() {
-        return checkBoxMode;
     }
 
     @Override
@@ -72,7 +62,7 @@ public class ImageListAdapter extends BaseAdapter {
             tvLong = (TextView) convertView.findViewById(R.id.listview_item_longitude);
             tvLight = (TextView) convertView.findViewById(R.id.listview_item_light);
             tvDir = (TextView) convertView.findViewById(R.id.listview_item_direction);
-            chCheck = (CheckBox) convertView.findViewById(R.id.listview_item_checkbox);
+            chCheck = (ImageView) convertView.findViewById(R.id.listview_item_check_image);
         }
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -83,13 +73,13 @@ public class ImageListAdapter extends BaseAdapter {
         tvLong.setText("경도 : " + item.getLongitude());
         tvLight.setText("조도 : " + item.getLight());
         tvDir.setText("방향 : " + item.getDirection());
+        if(item.isChecked()) {
+            chCheck.setVisibility(View.VISIBLE);
+        } else {
+            chCheck.setVisibility(View.GONE);
+        }
 
-        chCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                item.setChecked(isChecked);
-            }
-        });
+
         return convertView;
     }
 }

@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.namooplus.jejurizmandroid.R;
@@ -70,24 +68,21 @@ public class CameraListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setTitle("사진 정보 편집");
 
-        initGridSetting();
-    }
-
-    private void initGridSetting() {
-        new Thread() {
+        mAdapter = new ImageListAdapter(mImageList, CameraListActivity.this);
+        mGridView.setAdapter(mAdapter);
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void run() {
-                super.run();
-                mAdapter = new ImageListAdapter(mImageList, CameraListActivity.this);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                if(mImageList.get(position).isChecked()) {
+                    mImageList.get(position).setChecked(false);
+                } else {
+                    mImageList.get(position).setChecked(true);
+                }
+                mAdapter.notifyDataSetChanged();
                 mGridView.setAdapter(mAdapter);
-                mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Log.i("HS", "onItemClick : " + position);
-                    }
-                });
             }
-        }.start();
+        });
     }
 
     @Override
@@ -175,7 +170,7 @@ public class CameraListActivity extends AppCompatActivity {
     public void onClickOkButton() {
         Intent i = new Intent(this, ImageDetailActivity.class);
         i.putParcelableArrayListExtra("datas", mImageList);
-        startActivity(i);
+        startActivityForResult(i, AppSetting.ACTIVITY_CODE_IMAGE_DETAIL);
     }
 
     @OnClick(R.id.activity_camera_list_button_cancle)

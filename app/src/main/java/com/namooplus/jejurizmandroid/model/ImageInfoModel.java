@@ -27,6 +27,7 @@ public class ImageInfoModel implements Parcelable {
         this.light = light;
         this.direction = direction;
         this.orientation = orientation;
+        this.isChecked = true;
     }
 
     @Override
@@ -42,6 +43,7 @@ public class ImageInfoModel implements Parcelable {
         dest.writeFloat(light);
         dest.writeFloat(direction);
         dest.writeInt(orientation);
+        dest.writeInt(isChecked == true ? 1 : 0);
     }
 
     private void readFromParcel(Parcel source) {
@@ -51,6 +53,7 @@ public class ImageInfoModel implements Parcelable {
         light = source.readFloat();
         direction = source.readFloat();
         orientation = source.readInt();
+        isChecked = source.readInt() == 1 ? true : false;
     }
 
     public static final Parcelable.Creator<ImageInfoModel> CREATOR = new Creator<ImageInfoModel>() {
@@ -120,4 +123,6 @@ public class ImageInfoModel implements Parcelable {
     public void setChecked(boolean checked) {
         isChecked = checked;
     }
+
+
 }
