@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
-import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_PATH;
+import static com.namooplus.jejurizmandroid.common.AppSetting.IMAGE_STRING_FORMAT;
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_TEMP_PATH;
 
 /**
@@ -79,10 +79,12 @@ public class Utils {
                 dir.mkdirs();
             }
 
-            file = new File(SAVE_IMAGE_PATH + num + ".jpg");
+            file = new File(dir, num + IMAGE_STRING_FORMAT);
             if (file.exists()) {
                 file.delete();
             }
+
+            boolean a = file.canWrite();
 
 
             fos = new FileOutputStream(file);
@@ -105,7 +107,7 @@ public class Utils {
                 dir.mkdirs();
             }
 
-            file = new File(SAVE_IMAGE_PATH + num + ".jpg");
+            file = new File(SAVE_IMAGE_TEMP_PATH + num + ".jpg");
             if (file.exists()) {
                 file.delete();
             }

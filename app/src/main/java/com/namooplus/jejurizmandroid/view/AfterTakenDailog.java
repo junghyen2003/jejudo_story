@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import static com.namooplus.jejurizmandroid.common.AppSetting.IMAGE_SAMPLE_SIZE;
-import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_PATH;
+import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_TEMP_PATH;
 
 
 /**
@@ -188,14 +188,14 @@ public class AfterTakenDailog extends DialogFragment {
     private void saveData() {
         FileOutputStream fos = null;
         try {
-            File dir = new File(SAVE_IMAGE_PATH);
+            File dir = new File(SAVE_IMAGE_TEMP_PATH);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
 
             final String imageFilename = System.currentTimeMillis() + "_" + mTitle + ".png";
 
-            final File file = new File(SAVE_IMAGE_PATH + imageFilename);
+            final File file = new File(SAVE_IMAGE_TEMP_PATH + imageFilename);
 
             if (file.exists()) {
                 file.delete();

@@ -1,9 +1,12 @@
 package com.namooplus.jejurizmandroid;
 
+import android.location.Location;
 import android.os.Environment;
 import android.util.Log;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -17,8 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_EXCEL_PATH;
+import java.util.Iterator;
 
 /**
  * Created by HeungSun-AndBut on 2016. 6. 14..
@@ -48,33 +50,44 @@ public class ExcelManager {
             Log.e("HS", "초기화가 되지 않았습니다.");
         }
 
-        //엑셀 파일 생성
-        mExcelDir = new File(SAVE_EXCEL_PATH);
-
-        //기존 엑셀 파일이 있는지 있으면 해당 줄만큼 들고오기
-        if (!mExcelDir.exists()) {
-            mExcelDir.mkdir();
-        }
-
     }
 
-    public File createExcelFile(String fileName) {
-        File mExcelFile = new File(mExcelDir, fileName);
-
-        if(mExcelFile.exists()) {
-            mExcelFile.delete();
-        }
-
-        //최초일경우 첫줄 정의
-        initExcelFile(mExcelFile);
-
-        return mExcelFile;
-    }
-
-
-    /*public void readExcelFile() {
+    public Location readLatLanForExcel(String path) {
         try {
-            FileInputStream myInput = new FileInputStream(mExcelFile);
+            File excelFile = new File(path);
+            if (excelFile.exists()) {
+                FileInputStream myInput = new FileInputStream(excelFile);
+                POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
+                HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                if (myWorkBook.getNumberOfSheets() != 0) {
+                    HSSFSheet mySheet = myWorkBook.getSheetAt(0); //첫번째 시트만 활용
+
+                    HSSFRow firstRow = mySheet.getRow(2);
+                    String strLat = firstRow.getCell(4).getStringCellValue();
+                    String strLon = firstRow.getCell(5).getStringCellValue();
+
+                    double lat = Double.valueOf(strLat);
+                    double lon = Double.valueOf(strLon);
+
+                    Log.i("HS", "엑셀 : " + lat + ":" + lon);
+                    Location result = new Location("end");
+                    result.setLatitude(lat);
+                    result.setLongitude(lon);
+
+                    return result;
+                }
+            }
+
+        } catch (Exception e) {
+            Log.i("HS", "기존 엑셀 값 가져오기 실패 : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void readExcelFile(File readFile) {
+        try {
+            FileInputStream myInput = new FileInputStream(readFile);
             POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
             HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
             if (myWorkBook.getNumberOfSheets() != 0) {
@@ -86,9 +99,11 @@ public class ExcelManager {
 
                 while (rowIter.hasNext()) {
                     HSSFRow myRow = (HSSFRow) rowIter.next(); // 한줄 데이터
+                    Log.i("HS", "result : " + myRow.getCell(4).getStringCellValue());
                     Iterator cellIter = myRow.cellIterator();
                     while (cellIter.hasNext()) {
                         HSSFCell myCell = (HSSFCell) cellIter.next();
+                        Log.i("HS", "data : " + myCell.getStringCellValue());
                     }
                 }
             }
@@ -97,55 +112,59 @@ public class ExcelManager {
             e.printStackTrace();
         }
 
-        return;
-    }*/
+    }
 
-    private void initExcelFile(File excelFile) {
+    public File getExcelFile(File excelFile) {
         FileOutputStream os = null;
         try {
-            // New Workbook
-            HSSFWorkbook myWorkBook = new HSSFWorkbook();
+            if (!excelFile.exists()) {
+                // New Workbook
+                HSSFWorkbook myWorkBook = new HSSFWorkbook();
 
-            Cell c = null;
+                Cell c = null;
 
-            // Cell style for header row
-            CellStyle cs = myWorkBook.createCellStyle();
-            cs.setFillForegroundColor(HSSFColor.LIME.index);
-            cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+                // Cell style for header row
+                CellStyle cs = myWorkBook.createCellStyle();
+                cs.setFillForegroundColor(HSSFColor.LIME.index);
+                cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
 
-            Sheet sheet1 = myWorkBook.createSheet("사진정보");
+                Sheet sheet1 = myWorkBook.createSheet("사진정보");
 
-            //만약에 처음 파일을 생성하게 된다면
-            Log.i("HS", "엑셀 파일 최초 생성으로 최상단 태그명 붙이기");
-            // Generate column headings
-            Row row = sheet1.createRow(0);
+                //만약에 처음 파일을 생성하게 된다면
+                Log.i("HS", "엑셀 파일 최초 생성으로 최상단 태그명 붙이기");
+                // Generate column headings
+                Row row = sheet1.createRow(0);
 
-            c = row.createCell(0);
-            c.setCellValue("제목");
-            c.setCellStyle(cs);
+                c = row.createCell(0);
+                c.setCellValue("제목");
+                c.setCellStyle(cs);
 
-            c = row.createCell(1);
-            c.setCellValue("저장 주소");
-            c.setCellStyle(cs);
+                c = row.createCell(1);
+                c.setCellValue("저장 주소");
+                c.setCellStyle(cs);
 
-            c = row.createCell(2);
-            c.setCellValue("조도");
-            c.setCellStyle(cs);
+                c = row.createCell(2);
+                c.setCellValue("조도");
+                c.setCellStyle(cs);
 
-            c = row.createCell(3);
-            c.setCellValue("방향");
-            c.setCellStyle(cs);
+                c = row.createCell(3);
+                c.setCellValue("방향");
+                c.setCellStyle(cs);
 
-            c = row.createCell(4);
-            c.setCellValue("위도");
-            c.setCellStyle(cs);
+                c = row.createCell(4);
+                c.setCellValue("위도");
+                c.setCellStyle(cs);
 
-            c = row.createCell(5);
-            c.setCellValue("경도");
-            c.setCellStyle(cs);
+                c = row.createCell(5);
+                c.setCellValue("경도");
+                c.setCellStyle(cs);
 
-            os = new FileOutputStream(excelFile);
-            myWorkBook.write(os);
+                os = new FileOutputStream(excelFile);
+                myWorkBook.write(os);
+
+            } else {
+                return excelFile;
+            }
         } catch (IOException e) {
             Log.w("FileUtils", "Error writing " + excelFile, e);
         } catch (Exception e) {
@@ -158,9 +177,10 @@ public class ExcelManager {
             } catch (Exception ex) {
             }
         }
+        return excelFile;
     }
 
-    public void saveExcelFile(File excelFile,String imagePath,  String mTitle, float bright, float direction, double lat, double lon) {
+    public void saveExcelFile(File excelFile, String imagePath, String mTitle, float bright, float direction, double lat, double lon) {
         FileOutputStream os = null;
         Cell c = null;
         try {
@@ -176,7 +196,7 @@ public class ExcelManager {
 
             // Generate column headings
             Row row = sheet1.createRow(++mLastRowNum);
-
+            Log.i("HS","엑셀 기록 : " + mLastRowNum + "번째 줄 ");
             c = row.createCell(0);
             c.setCellValue(mTitle);
 

@@ -490,7 +490,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
 
         @Override
         protected File getPhotoDirectory() {
-            return new File(AppSetting.SAVE_IMAGE_PATH);
+            return new File(AppSetting.SAVE_IMAGE_TEMP_PATH);
         }
 
         @Override
