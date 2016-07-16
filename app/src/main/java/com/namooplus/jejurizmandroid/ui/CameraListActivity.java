@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.namooplus.jejurizmandroid.R;
 import com.namooplus.jejurizmandroid.adapter.ImageListAdapter;
@@ -157,7 +157,6 @@ public class CameraListActivity extends AppCompatActivity {
         mMenu2.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Toast.makeText(CameraListActivity.this, "제목 입력 모드", Toast.LENGTH_SHORT).show();
                 mLlBottom.setVisibility(View.VISIBLE);
                 return false;
             }
@@ -168,6 +167,15 @@ public class CameraListActivity extends AppCompatActivity {
 
     @OnClick(R.id.activity_camera_list_button_ok)
     public void onClickOkButton() {
+        //체크된 정보만 넘기기
+        ArrayList<ImageInfoModel> newList = new ArrayList<>();
+        for(ImageInfoModel item : mImageList) {
+            if(item.isChecked()) {
+                newList.add(item);
+            }
+        }
+
+        Log.i("HS","넘어가는 파일 갯수 : " + newList.size());
         Intent i = new Intent(this, ImageDetailActivity.class);
         i.putParcelableArrayListExtra("datas", mImageList);
         startActivityForResult(i, AppSetting.ACTIVITY_CODE_IMAGE_DETAIL);
@@ -175,6 +183,6 @@ public class CameraListActivity extends AppCompatActivity {
 
     @OnClick(R.id.activity_camera_list_button_cancle)
     public void onClickCancleButton() {
-
+        mLlBottom.setVisibility(View.GONE);
     }
 }

@@ -1,6 +1,7 @@
 package com.namooplus.jejurizmandroid.ui;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.namooplus.jejurizmandroid.common.AppSetting.EXCEL_STRING_FORMAT;
+import static com.namooplus.jejurizmandroid.common.AppSetting.IMAGE_SAMPLE_SIZE;
 import static com.namooplus.jejurizmandroid.common.AppSetting.IMAGE_STRING_FORMAT;
 import static com.namooplus.jejurizmandroid.common.AppSetting.NAMOO_STRING_SPLIT;
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAME_STORE_MIN_DISTANCE;
@@ -95,6 +97,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setTitle("GPS 확인 및 제목 입력");
 
@@ -102,8 +105,16 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
         mCurrentLong = mImageList.get(0).getLongitude();
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 8;
+        options.inSampleSize = IMAGE_SAMPLE_SIZE;
         mIvImage.setImageBitmap(BitmapFactory.decodeFile(mImageList.get(0).getFilePath(), options));
+
+    }
+
+    private void clearAndFinish() {
+        Utils.deleteDir(new File(AppSetting.SAVE_IMAGE_TEMP_PATH));
+        Intent i = new Intent(ImageDetailActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
 
     }
 
@@ -116,11 +127,14 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         saveData();
+                        clearAndFinish();
+
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
+
 
     @OnClick(R.id.activity_camera_image_cancle)
     public void onClickCancle() {
@@ -130,7 +144,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        //TODO 취소시 삭제 한 후에 첫 화면으로
+                        clearAndFinish();
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null)
@@ -190,7 +204,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
     //디렉토리 규칙 기본 주소/[사용자가 정한 타이틀]_[넘버링]/[파일이름].[파일형식] , 파일에 _가 포함되면 안된다.
     private File nextDir() {
         File saveDir = new File(AppSetting.SAVE_SITE_PATH);
-        String nextDirName = saveDir + userTitle + "_0" + EXCEL_STRING_FORMAT;
+        String nextDirName = saveDir + "/" + userTitle + "_0";
         File[] files = saveDir.listFiles();
 
         for (File file : files) {
@@ -224,13 +238,14 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
         File[] files = siteDir.listFiles();
         if (files.length > 0) {
             for (File file : files) {
-                String[] name = file.getName().split("\\(");
-                String num = name[name.length - 1].split("\\)")[0];
-                int temp = Integer.valueOf(num);
-                if (finalNum < temp) {
-                    finalNum = temp;
+                if(file.getName().contains(IMAGE_STRING_FORMAT)) {
+                    String[] name = file.getName().split("\\(");
+                    String num = name[name.length - 1].split("\\)")[0];
+                    int temp = Integer.valueOf(num);
+                    if (finalNum < temp) {
+                        finalNum = temp;
+                    }
                 }
-
             }
         }
 
@@ -255,8 +270,6 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 //데이터 미세 조정하고 엑셀에 저장하기
                 saveExcel(siteDir, excelFile);
 
-                //임시 이미지 파일 삭제
-                Utils.deleteDir(new File(AppSetting.SAVE_IMAGE_TEMP_PATH));
             }
         } catch (Exception e) {
 
@@ -271,7 +284,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 item.setLatitude(mCurrentLat);
                 item.setLongitude(mCurrentLong);
 
-                String finalPath = siteDir.getAbsolutePath() + userTitle
+                String finalPath = siteDir.getAbsolutePath() + "/" + userTitle
                         + "(" + ++nextNum + ")" + IMAGE_STRING_FORMAT;
 
                 Log.i("HS", "최종 목적지 위치 : " + finalPath);

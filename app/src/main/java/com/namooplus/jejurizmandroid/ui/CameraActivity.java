@@ -60,6 +60,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
 import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
 import static com.namooplus.jejurizmandroid.common.AppSetting.ACTIVITY_CODE_CAMERA_LIST;
+import static com.namooplus.jejurizmandroid.common.AppSetting.INTERVAL_MAP_REFRESH;
 
 /**
  * Created by HeungSun-AndBut on 2016. 6. 5..
@@ -181,7 +182,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
                 super.run();
                 while (isRunJob) {
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(INTERVAL_MAP_REFRESH);
                         timerJob();
                     } catch (Exception e) {
                     }
