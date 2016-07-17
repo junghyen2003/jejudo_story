@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -44,6 +45,7 @@ import com.namooplus.jejurizmandroid.common.GpsInfo;
 import com.namooplus.jejurizmandroid.common.LightInfo;
 import com.namooplus.jejurizmandroid.common.Utils;
 import com.namooplus.jejurizmandroid.model.ImageInfoModel;
+import com.namooplus.jejurizmandroid.view.CustomTextView;
 import com.namooplus.jejurizmandroid.view.DrawingView;
 
 import java.io.File;
@@ -95,17 +97,18 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
     @BindView(R.id.activity_camera_drawingview)
     public DrawingView mDvDrawingView;
 
-    @BindView(R.id.activity_camera_location_info)
-    public TextView mTxLocation;
-
-    @BindView(R.id.activity_camera_light_info)
-    public TextView mTxLight;
-
     @BindView(R.id.activity_camera_flash_image)
     public ImageView mFlash;
 
     @BindView(R.id.activity_camera_list_button)
     public ImageView mListButton;
+
+    public CustomTextView mCtxLocation;
+    public CustomTextView mCtxLight;
+
+    public TextView mTxLocation;
+    public TextView mTxLight;
+
 
     private List<Camera.Area> mFocusList;
     public static MyCameraHost mMyCameraHost;
@@ -131,6 +134,19 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
         setContentView(R.layout.activity_camera);
 
         ButterKnife.bind(CameraActivity.this);
+
+        int ori = getResources().getConfiguration().orientation;
+
+        if (ori == Configuration.ORIENTATION_PORTRAIT) // 세로 전환시
+        {
+            mCtxLocation = (CustomTextView)findViewById(R.id.activity_camera_location_info);
+            mCtxLight = (CustomTextView)findViewById(R.id.activity_camera_light_info);
+        }
+        else if (ori == Configuration.ORIENTATION_LANDSCAPE)// 가로 전환시
+        {
+            mTxLocation = (TextView)findViewById(R.id.activity_camera_location_info);
+            mTxLight = (TextView)findViewById(R.id.activity_camera_light_info);
+        }
 
         mCompass = new Compass(this);
         mLightInfo = new LightInfo(this);
@@ -197,8 +213,16 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
             public void run() {
                 mLightValue = mLightInfo.getmLightValue();
                 mCompassValue = mCompass.getDirection();
-                mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
-                mTxLight.setText("조도:" + mLightValue);
+
+                if(mTxLocation != null) {
+                    mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+                    mTxLight.setText("조도:" + mLightValue);
+                } else if(mCtxLocation != null) {
+                    mCtxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
+                    mCtxLight.setText("조도:" + mLightValue);
+                }
+
+
                 mOrientation = getResources().getConfiguration().orientation;
             }
         });
