@@ -14,7 +14,7 @@ import butterknife.ButterKnife;
 public class IntroActivity extends AppCompatActivity {
 
     @BindView(R.id.intro_image)
-    private ImageView mIntroImage;
+    public ImageView mIntroImage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">jejurizmandroid</string>
 
+    <string name="activity_intro_main_title">찍고찍고 찍어봐~</string>
     <string name="activity_camera_progress">잠시만 기다리세요...</string>
 
     <string name="activity_camera_gps_setting">GPS 셋팅</string>
@@ -23,5 +24,23 @@
     <string name="activity_main_title_bar">수집 앱</string>
     <string name="activity_camera_list_title_bar">동일 사진 선택</string>
     <string name="activity_image_detail_title_bar">GPS 확인 및 제목입력</string>
+
+    <string name="activity_camera_click_list_no_taken">"한장 이상의 사진을 찍으세요"</string>
+    <string name="activity_camera_click_list_no_save">"사진을 저장중입니다."</string>
+    <string name="activity_camera_click_taken">촬영!</string>
+
+    <string name="activity_camera_list_dialog_delete_title">현재 사진은 삭제됩니다.</string>
+    <string name="activity_camera_list_dialog_add_image_title">사진 추가</string>
+    <string name="activity_camera_list_dialog_add_image_text">추가 사진 작업을 진행합니다.</string>
+    <string name="activity_camera_list_check">확인</string>
+    <string name="activity_camera_list_cancle">취소</string>
+
+    <string name="activity_image_detail_dialog_check">확인</string>
+    <string name="activity_image_detail_dialog_check_save">저장하시겠습니까?</string>
+    <string name="activity_image_detail_dialog_cancle">취소</string>
+    <string name="activity_image_detail_dialog_cancle_remove">삭제하시겠습니까?</string>
+    <string name="activity_image_detail_dialog_invalid_title">삭제하시겠습니까?</string>
+    <string name="activity_image_detail_edittext_hint">제목을 입력하세요</string>
+
 
 </resources>

@@ -69,7 +69,7 @@ public class ExcelManager {
                     double lat = Double.valueOf(strLat);
                     double lon = Double.valueOf(strLon);
 
-                    Log.i("HS", "엑셀 : " + lat + ":" + lon);
+                    //Log.i("HS", "엑셀 : " + lat + ":" + lon);
                     Location result = new Location("end");
                     result.setLatitude(lat);
                     result.setLongitude(lon);
@@ -79,7 +79,7 @@ public class ExcelManager {
             }
 
         } catch (Exception e) {
-            Log.i("HS", "기존 엑셀 값 가져오기 실패 : " + e.getMessage());
+            //Log.i("HS", "기존 엑셀 값 가져오기 실패 : " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -196,7 +196,7 @@ public class ExcelManager {
 
             // Generate column headings
             Row row = sheet1.createRow(++mLastRowNum);
-            Log.i("HS","엑셀 기록 : " + mLastRowNum + "번째 줄 ");
+            Log.i("HS", "엑셀 기록 : " + mLastRowNum + "번째 줄 ");
             c = row.createCell(0);
             c.setCellValue(mTitle);
 

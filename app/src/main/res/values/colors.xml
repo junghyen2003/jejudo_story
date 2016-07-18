@@ -3,4 +3,7 @@
     <color name="colorPrimary">#fee6d3</color>
     <color name="colorPrimaryDark">#b4e0e1</color>
     <color name="colorAccent">#000000</color>
+
+    //카메라 벽 색상
+    <color name="activity_camera_wall_color">#55000000</color>
 </resources>

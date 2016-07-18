@@ -18,6 +18,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.namooplus.jejurizmandroid.common.AppSetting.ACTIVITY_TYPE_CAMERA_LANDSCAPE;
+import static com.namooplus.jejurizmandroid.common.AppSetting.ACTIVITY_TYPE_CAMERA_SIGN;
+
 /**
  * Created by HeungSun-AndBut on 2016. 6. 5..
  */
@@ -50,14 +53,15 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.activity_main_camera_sign_button)
     public void signCameraClick(View v) {
-
-        Intent i = new Intent(MainActivity.this, CameraActivity.class);
+        Intent i = new Intent(MainActivity.this, NewCameraActivity.class);
+        i.putExtra("type", ACTIVITY_TYPE_CAMERA_SIGN);
         startActivity(i);
     }
 
     @OnClick(R.id.activity_main_camera_landscape_button)
     public void landscapeCameraClick(View v) {
-        Intent i = new Intent(MainActivity.this, CameraActivity.class);
+        Intent i = new Intent(MainActivity.this, NewCameraActivity.class);
+        i.putExtra("type", ACTIVITY_TYPE_CAMERA_LANDSCAPE);
         startActivity(i);
     }
 }

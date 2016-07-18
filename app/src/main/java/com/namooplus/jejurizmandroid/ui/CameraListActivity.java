@@ -1,5 +1,6 @@
 package com.namooplus.jejurizmandroid.ui;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,22 +8,27 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.namooplus.jejurizmandroid.R;
-import com.namooplus.jejurizmandroid.adapter.ImageListAdapter;
 import com.namooplus.jejurizmandroid.common.AppSetting;
 import com.namooplus.jejurizmandroid.common.Utils;
 import com.namooplus.jejurizmandroid.model.ImageInfoModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,7 +56,7 @@ public class CameraListActivity extends AppCompatActivity {
     public Button mBtnCancle;
 
     private ArrayList<ImageInfoModel> mImageList;
-    private ImageListAdapter mAdapter;
+    private ImageGalleryAdapter mAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,7 +74,7 @@ public class CameraListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setTitle(getResources().getString(R.string.activity_camera_list_title_bar));
 
-        mAdapter = new ImageListAdapter(mImageList, CameraListActivity.this);
+        mAdapter = new ImageGalleryAdapter(CameraListActivity.this, mImageList);
         mGridView.setAdapter(mAdapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -81,8 +87,6 @@ public class CameraListActivity extends AppCompatActivity {
                 }
 
                 mAdapter.notifyDataSetChanged();
-                mAdapter.notifyDataSetInvalidated();
-                //mGridView.setAdapter(mAdapter);
             }
         });
     }
@@ -111,7 +115,7 @@ public class CameraListActivity extends AppCompatActivity {
 
     private void checkDialog() {
         AlertDialog.Builder db = new AlertDialog.Builder(this);
-        db.setTitle("현재 사진은 삭제 됩니다.")
+        db.setTitle(R.string.activity_camera_list_dialog_delete_title)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -139,8 +143,8 @@ public class CameraListActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 AlertDialog.Builder db = new AlertDialog.Builder(CameraListActivity.this);
-                db.setTitle("추가 모드")
-                        .setMessage("추가 사진 작업을 진행합니다.")
+                db.setTitle(R.string.activity_camera_list_dialog_add_image_title)
+                        .setMessage(R.string.activity_camera_list_dialog_add_image_text)
                         .setCancelable(true)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -177,7 +181,6 @@ public class CameraListActivity extends AppCompatActivity {
             }
         }
 
-        Log.i("HS","넘어가는 파일 갯수 : " + newList.size());
         Intent i = new Intent(this, ImageDetailActivity.class);
         i.putParcelableArrayListExtra("datas", mImageList);
         startActivityForResult(i, AppSetting.ACTIVITY_CODE_IMAGE_DETAIL);
@@ -186,5 +189,73 @@ public class CameraListActivity extends AppCompatActivity {
     @OnClick(R.id.activity_camera_list_button_cancle)
     public void onClickCancleButton() {
         mLlBottom.setVisibility(View.GONE);
+    }
+
+    public class ImageGalleryAdapter extends ArrayAdapter<ImageInfoModel> {
+
+        Context context;
+
+
+        public ImageGalleryAdapter(Context context, List<ImageInfoModel> images) {
+            super(context, 0, images);
+            this.context = context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final ViewHolder holder;
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.listview_item_image, null);
+                holder = new ViewHolder(convertView);
+
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            final ImageInfoModel item = getItem(position);
+
+            Glide.with(context)
+                    .load(item.getFilePath())
+                    .thumbnail(0.1f)
+                    .dontAnimate()
+                    .centerCrop()
+                    .into(holder.ivImage);
+
+            holder.tvLat.setText("위도 : " + item.getLatitude());
+            holder.tvLong.setText("경도 : " + item.getLongitude());
+            holder.tvLight.setText("조도 : " + item.getLight());
+            holder.tvDir.setText("방향 : " + item.getDirection());
+
+            if(item.isChecked()) {
+                holder.chCheck.setVisibility(View.VISIBLE);
+            } else {
+                holder.chCheck.setVisibility(View.GONE);
+            }
+
+            return convertView;
+        }
+    }
+
+    class ViewHolder {
+        public ImageView ivImage;
+        public TextView tvLat;
+        public TextView tvLong;
+        public TextView tvLight;
+        public TextView tvDir;
+        public ImageView chCheck;
+
+        // This is like storing too much data in memory.
+        // find a better way to handle this
+
+        public ViewHolder(View view) {
+            ivImage = (ImageView) view.findViewById(R.id.listview_item_image);
+            tvLat = (TextView) view.findViewById(R.id.listview_item_latitude);
+            tvLong = (TextView) view.findViewById(R.id.listview_item_longitude);
+            tvLight = (TextView) view.findViewById(R.id.listview_item_light);
+            tvDir = (TextView) view.findViewById(R.id.listview_item_direction);
+            chCheck = (ImageView) view.findViewById(R.id.listview_item_check_image);
+        }
+
     }
 }

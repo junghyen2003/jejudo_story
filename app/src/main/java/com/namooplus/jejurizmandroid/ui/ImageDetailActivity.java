@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -121,8 +120,8 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
     @OnClick(R.id.activity_camera_image_confirm)
     public void onClickConfirm() {
         AlertDialog.Builder db = new AlertDialog.Builder(this);
-        db.setTitle("확인")
-                .setMessage("저장하시겠습니까?")
+        db.setTitle(R.string.activity_image_detail_dialog_check)
+                .setMessage(R.string.activity_image_detail_dialog_check_save)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -139,8 +138,8 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
     @OnClick(R.id.activity_camera_image_cancle)
     public void onClickCancle() {
         AlertDialog.Builder db = new AlertDialog.Builder(this);
-        db.setTitle("취소")
-                .setMessage("취소하시겠습니까?")
+        db.setTitle(R.string.activity_image_detail_dialog_cancle)
+                .setMessage(R.string.activity_image_detail_dialog_cancle_remove)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -197,7 +196,6 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
 
             map.setOnMapLongClickListener(this);
         } catch (SecurityException e) {
-            Log.i("HS", "onMapReady " + e.getMessage());
         }
     }
 
@@ -238,7 +236,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
         File[] files = siteDir.listFiles();
         if (files.length > 0) {
             for (File file : files) {
-                if(file.getName().contains(IMAGE_STRING_FORMAT)) {
+                if (file.getName().contains(IMAGE_STRING_FORMAT)) {
                     String[] name = file.getName().split("\\(");
                     String num = name[name.length - 1].split("\\)")[0];
                     int temp = Integer.valueOf(num);
@@ -258,7 +256,8 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
 
             userTitle = mEtEdit.getText().toString();
             if (userTitle.isEmpty()) {
-                Toast.makeText(this, "제목이 입력되지 않았습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.activity_image_detail_dialog_invalid_title),
+                        Toast.LENGTH_SHORT).show();
             } else {
                 //장소 저장 규칙에 따라서 해당하는 디렉토리 가져오기
                 File siteDir = nextDir();
@@ -287,9 +286,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 String finalPath = siteDir.getAbsolutePath() + "/" + userTitle
                         + "(" + ++nextNum + ")" + IMAGE_STRING_FORMAT;
 
-                Log.i("HS", "최종 목적지 위치 : " + finalPath);
-                //원래 파일에서
-
+                //원래 파일에서 복사하기
                 Utils.copyFile(new File(item.getFilePath()), new File(finalPath));
 
                 //변경된 주소 저장

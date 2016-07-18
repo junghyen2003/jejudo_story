@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import static com.namooplus.jejurizmandroid.common.AppSetting.IMAGE_STRING_FORMAT;
 import static com.namooplus.jejurizmandroid.common.AppSetting.SAVE_IMAGE_TEMP_PATH;
@@ -70,7 +71,8 @@ public class Utils {
         return false;
     }
 
-    public static String saveByteToFile(byte[] image, int num) {
+
+    public static String saveByteToFile(byte[] image) {
         File file = null;
         FileOutputStream fos = null;
         try {
@@ -79,7 +81,7 @@ public class Utils {
                 dir.mkdirs();
             }
 
-            file = new File(dir, num + IMAGE_STRING_FORMAT);
+            file = new File(dir, Calendar.getInstance().getTimeInMillis() + IMAGE_STRING_FORMAT);
             if (file.exists()) {
                 file.delete();
             }
@@ -95,7 +97,40 @@ public class Utils {
         return file.getAbsolutePath();
     }
 
-    public static String saveBitmapToFile(Bitmap mBit, int num) {
+    public static Bitmap cropCenterBitmap(Bitmap src, int w, int h) {
+        if(src == null)
+            return null;
+
+        int width = src.getWidth();
+        int height = src.getHeight();
+
+        if(width < w && height < h)
+            return src;
+
+        int x = 0;
+        int y = 0;
+
+        if(width > w)
+            x = (width - w)/2;
+
+        if(height > h)
+            y = (height - h)/2;
+
+        int cw = w; // crop width
+        int ch = h; // crop height
+
+        if(w > width)
+            cw = width;
+
+        if(h > height)
+            ch = height;
+
+
+        return Bitmap.createBitmap(src, x, y, cw, ch);
+    }
+
+
+    public static String saveBitmapToFile(Bitmap mBit) {
         FileOutputStream fos = null;
         File file = null;
         try {
@@ -104,7 +139,7 @@ public class Utils {
                 dir.mkdirs();
             }
 
-            file = new File(SAVE_IMAGE_TEMP_PATH + num + ".jpg");
+            file = new File(dir, Calendar.getInstance().getTimeInMillis() + IMAGE_STRING_FORMAT);
             if (file.exists()) {
                 file.delete();
             }
@@ -172,9 +207,9 @@ public class Utils {
 
     public static void deleteFile(ArrayList<ImageInfoModel> list) {
         File file = null;
-        for(ImageInfoModel item : list) {
+        for (ImageInfoModel item : list) {
             file = new File(item.getFilePath());
-            if(file.exists()) {
+            if (file.exists()) {
                 file.delete();
             }
         }

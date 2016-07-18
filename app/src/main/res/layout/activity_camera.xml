@@ -1,41 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_camera_top_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
+    <com.namooplus.jejurizmandroid.ui.SquareCameraPreview
+        android:id="@+id/activity_camera_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent">
-        android:layout_centerInParent="true">
-
-        <com.commonsware.cwac.camera.CameraView
-            android:id="@+id/activity_camera_cameraview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true" />
-
-        <com.namooplus.jejurizmandroid.view.DrawingView
-            android:id="@+id/activity_camera_drawingview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true" />
-
-    </RelativeLayout>
-
-
-    <!--android:layout_centerInParent="true"-->
-
-    <!--android:layout_height="@dimen/post_detail_picture_viewpager"-->
-
-    <View
-        android:id="@+id/activity_camera_shutter"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#ffffff"
-        android:visibility="gone" />
+        android:layout_height="match_parent" />
 
     <ImageButton
         android:id="@+id/activity_camera_take_button"
@@ -57,16 +29,15 @@
         android:layout_alignParentRight="true"
         android:layout_margin="10dp"
         android:background="#ffffff"
-        android:textColor="#000000"
-        />
+        android:textColor="#000000" />
 
     <com.namooplus.jejurizmandroid.view.CustomTextView
         android:id="@+id/activity_camera_light_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_below="@id/activity_camera_location_info"
         android:layout_alignParentRight="true"
+        android:layout_below="@id/activity_camera_location_info"
+        android:layout_margin="10dp"
         android:background="#ffffff"
         android:textColor="#000000" />
 
@@ -119,34 +90,42 @@
     -->
     <!--오른쪽 벽 -->
     <LinearLayout
+        android:id="@+id/activity_camera_wall_right"
         android:layout_width="@dimen/black_screen_horizontal_space"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:background="#55000000" />
+        android:background="@color/activity_camera_wall_color"
+        android:orientation="vertical" />
 
     <!--왼쪽쪽 벽 -->
     <LinearLayout
+        android:id="@+id/activity_camera_wall_left"
         android:layout_width="@dimen/black_screen_horizontal_space"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
-        android:background="#55000000" />
+        android:background="@color/activity_camera_wall_color"
+        android:orientation="vertical" />
 
     <!--상단쪽 벽 -->
     <LinearLayout
+        android:id="@+id/activity_camera_wall_top"
         android:layout_width="match_parent"
         android:layout_height="@dimen/black_screen_vertical_space"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="@dimen/black_screen_horizontal_space"
         android:layout_marginRight="@dimen/black_screen_horizontal_space"
-        android:background="#55000000" />
+        android:background="@color/activity_camera_wall_color"
+        android:orientation="vertical" />
     <!--상단쪽 벽 -->
     <LinearLayout
+        android:id="@+id/activity_camera_wall_bottom"
         android:layout_width="match_parent"
         android:layout_height="@dimen/black_screen_vertical_space"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/black_screen_horizontal_space"
         android:layout_marginRight="@dimen/black_screen_horizontal_space"
-        android:background="#55000000" />
+        android:background="@color/activity_camera_wall_color"
+        android:orientation="vertical" />
 
 
 </RelativeLayout>
