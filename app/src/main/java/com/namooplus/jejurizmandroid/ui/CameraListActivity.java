@@ -66,7 +66,7 @@ public class CameraListActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setTitle("사진 정보 편집");
+        getSupportActionBar().setTitle(getResources().getString(R.string.activity_camera_list_title_bar));
 
         mAdapter = new ImageListAdapter(mImageList, CameraListActivity.this);
         mGridView.setAdapter(mAdapter);
@@ -79,8 +79,10 @@ public class CameraListActivity extends AppCompatActivity {
                 } else {
                     mImageList.get(position).setChecked(true);
                 }
+
                 mAdapter.notifyDataSetChanged();
-                mGridView.setAdapter(mAdapter);
+                mAdapter.notifyDataSetInvalidated();
+                //mGridView.setAdapter(mAdapter);
             }
         });
     }

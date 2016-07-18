@@ -6,9 +6,13 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.namooplus.jejurizmandroid.R;
+import com.namooplus.jejurizmandroid.common.AppSetting;
+import com.namooplus.jejurizmandroid.common.Utils;
+
+import java.io.File;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -21,10 +25,10 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.activity_main_camera_sign_button)
-    public ImageButton mSignCamera;
+    public LinearLayout mSignCamera;
 
     @BindView(R.id.activity_main_camera_landscape_button)
-    public ImageButton mLandscapeCamera;
+    public LinearLayout mLandscapeCamera;
 
     @BindView(R.id.app_tool_bar)
     public Toolbar toolbar;
@@ -38,12 +42,15 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setTitle("나무소프트");
+        getSupportActionBar().setTitle(getResources().getString(R.string.activity_main_title_bar));
 
+        //비정상적인 종료로 인하여 처리 되었을때 삭제 해버리자
+        Utils.deleteDir(new File(AppSetting.SAVE_IMAGE_TEMP_PATH));
     }
 
     @OnClick(R.id.activity_main_camera_sign_button)
     public void signCameraClick(View v) {
+
         Intent i = new Intent(MainActivity.this, CameraActivity.class);
         startActivity(i);
     }

@@ -7,13 +7,23 @@
     android:layout_height="match_parent"
     tools:context="com.namooplus.jejurizmandroid.ui.IntroActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="@+id/activity_intro"
-        app:layout_constraintLeft_toLeftOf="@+id/activity_intro"
-        app:layout_constraintRight_toRightOf="@+id/activity_intro"
-        app:layout_constraintTop_toTopOf="@+id/activity_intro" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="찍고찍고 찍어봐~"
+            android:textSize="40sp"
+            />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/intro" />
+
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

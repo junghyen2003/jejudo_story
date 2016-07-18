@@ -99,7 +99,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setTitle("GPS 확인 및 제목 입력");
+        getSupportActionBar().setTitle(getResources().getString(R.string.activity_image_detail_title_bar));
 
         mCurrentLat = mImageList.get(0).getLatitude();
         mCurrentLong = mImageList.get(0).getLongitude();

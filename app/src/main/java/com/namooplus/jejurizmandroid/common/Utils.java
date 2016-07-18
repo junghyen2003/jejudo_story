@@ -84,9 +84,6 @@ public class Utils {
                 file.delete();
             }
 
-            boolean a = file.canWrite();
-
-
             fos = new FileOutputStream(file);
 
             fos.write(image);

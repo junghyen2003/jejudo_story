@@ -34,32 +34,56 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginTop="?attr/actionBarSize"
                 android:orientation="vertical">
 
-                <ImageButton
+                <LinearLayout
                     android:id="@+id/activity_main_camera_sign_button"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:background="@drawable/temp_camera_image"
-                    android:layout_margin="10dp"
-                    android:text="activity_main_camera_sign_button" />
+                    android:background="#b4e0e1"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-                <ImageButton
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_camera_alt_white_24dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/activity_main_camera_sign_button" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/activity_main_camera_landscape_button"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:background="@drawable/temp_landscape_image"
-                    android:layout_margin="10dp"
-                    android:text="activity_main_camera_sign_button" />
+                    android:background="#fee6d3"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_image_white_24dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/activity_main_camera_landscape_button" />
+                </LinearLayout>
+
+
             </LinearLayout>
 
         </android.support.design.widget.CoordinatorLayout>
     </FrameLayout>
-
 
 
 </android.support.v4.widget.DrawerLayout>
