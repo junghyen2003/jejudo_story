@@ -126,6 +126,8 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         saveData();
+                        Toast.makeText(ImageDetailActivity.this,
+                                R.string.activity_image_detail_save_complete,Toast.LENGTH_SHORT).show();
                         clearAndFinish();
 
                     }
@@ -156,6 +158,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
         if (map != null) {
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLng)             // Sets the center of the map to current location
+                    .zoom(map.getCameraPosition().zoom)
                     .tilt(0)                   // Sets the tilt of the camera to 0 degrees
                     .build();                   // Creates a CameraPosition from the builder
             map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
@@ -201,33 +204,51 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
 
     //디렉토리 규칙 기본 주소/[사용자가 정한 타이틀]_[넘버링]/[파일이름].[파일형식] , 파일에 _가 포함되면 안된다.
     private File nextDir() {
-        File saveDir = new File(AppSetting.SAVE_SITE_PATH);
-        String nextDirName = saveDir + "/" + userTitle + "_0";
-        File[] files = saveDir.listFiles();
+        File nextDir = null;
+        try {
+            File saveDir = new File(AppSetting.SAVE_SITE_PATH);
+            //String nextDirName = saveDir + "/" + userTitle + "_0";
+            String nextDirName = "";
+            int sameTitleNum = 0;
+            File[] files = saveDir.listFiles();
 
-        for (File file : files) {
-            String[] dirName = file.getName().split(NAMOO_STRING_SPLIT);
-            if (dirName[0].equals(userTitle)) {
-                String path = file + "/" + userTitle + EXCEL_STRING_FORMAT;
+            //기존 디렉토리에 일치하는 장소가 있는지 찾기
+            for (File file : files) {
+                String[] dirName = file.getName().split(NAMOO_STRING_SPLIT);
+                if (dirName[0].equals(userTitle)) {
+                    String path = file + "/" + userTitle + EXCEL_STRING_FORMAT;
 
-                Location endPoint = ExcelManager.getInstance().readLatLanForExcel(path);
-                Location startPoint = new Location("start");
-                startPoint.setLongitude(mCurrentLong);
-                startPoint.setLatitude(mCurrentLat);
+                    Location endPoint = ExcelManager.getInstance().readLatLanForExcel(path);
+                    Location startPoint = new Location("start");
+                    startPoint.setLongitude(mCurrentLong);
+                    startPoint.setLatitude(mCurrentLat);
 
-                if (startPoint.distanceTo(endPoint) > SAME_STORE_MIN_DISTANCE) {
-                    //디렉토리에 기록된 숫자 가져오기
-                    int num = Integer.valueOf(file.getName().replace(dirName[dirName.length - 1], ""));
-                    nextDirName = saveDir + userTitle + NAMOO_STRING_SPLIT + num++;
+                    float dis = startPoint.distanceTo(endPoint);
+                    //같은 이름을 가졌지만 다른 업체임
+                    if (startPoint.distanceTo(endPoint) > SAME_STORE_MIN_DISTANCE) {
+                        //이거 다음에 디렉토리를 만들어야 함으로 번호를 가져옴, 혹시 뒤에 일치 하는게 있을수도 있으니 더 뒤지기
+                        sameTitleNum = Integer.valueOf(dirName[dirName.length - 1]);
+                    } else {
+                        //일치하는 장소를 찾음, 다른 디렉토리 뒤져볼 필요가 없으로 탈출
+                        nextDirName = file.getAbsolutePath();
+                        break;
+                    }
                 }
             }
-        }
 
-        File nextDir = new File(nextDirName);
-        if (!nextDir.exists()) {
-            nextDir.mkdir();
-        }
+            //일치하는 곳이 없다면 새로 생성 시켜줘야 함
+            if (nextDirName.isEmpty()) {
+                nextDirName = saveDir + "/" + userTitle + "_" + (sameTitleNum + 1);
+            }
 
+            nextDir = new File(nextDirName);
+            if (!nextDir.exists()) {
+                nextDir.mkdir();
+            }
+
+        } catch (Exception e) {
+
+        }
         return nextDir;
     }
 
@@ -246,7 +267,6 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 }
             }
         }
-
         return finalNum;
     }
 
@@ -292,8 +312,9 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 //변경된 주소 저장
                 item.setFilePath(finalPath);
 
-                ExcelManager.getInstance().saveExcelFile(excelFile, userTitle, item.getFilePath(),
-                        item.getLight(), item.getDirection(), item.getLatitude(), item.getLongitude());
+                ExcelManager.getInstance().saveExcelFile(excelFile, item.getFilePath(), userTitle,
+                        item.getLight(), item.getDirection(), item.getLatitude(), item.getLongitude(),
+                        item.getOrientation());
 
             }
         } catch (Exception e) {

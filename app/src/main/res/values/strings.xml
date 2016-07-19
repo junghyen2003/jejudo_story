@@ -41,6 +41,7 @@
     <string name="activity_image_detail_dialog_cancle_remove">삭제하시겠습니까?</string>
     <string name="activity_image_detail_dialog_invalid_title">삭제하시겠습니까?</string>
     <string name="activity_image_detail_edittext_hint">제목을 입력하세요</string>
+    <string name="activity_image_detail_save_complete">저장 되었습니다.</string>
 
 
 </resources>
