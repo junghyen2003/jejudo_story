@@ -173,11 +173,13 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         if (savedInstanceState != null) {
             mImageList = savedInstanceState.getParcelableArrayList(IMAGE_SAVE_DATA);
             mCameraID = savedInstanceState.getInt(CAMERA_ID_KEY);
+            mFlashMode = savedInstanceState.getString(CAMERA_FLASH_KEY);
             mImageParameters = savedInstanceState.getParcelable(IMAGE_INFO);
         } else {
             mImageList = new ArrayList<>();
             mCameraID = getBackCameraID();
             mImageParameters = new ImageParameters();
+            mFlashMode = FLASH_MODE_OFF;
         }
 
         mPreviewView.getHolder().addCallback(this);
@@ -446,6 +448,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
             mFlashMode = FLASH_MODE_OFF;
             mFlash.setImageResource(R.drawable.ic_flash_off_white_24dp);
         }
+        setFlashMode();
     }
 
     @OnClick(R.id.activity_camera_list_button)
@@ -568,6 +571,11 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         return rotation;
     }
 
+    private void setFlashMode() {
+        Camera.Parameters parameters = mCamera.getParameters();
+        parameters.setFlashMode(mFlashMode);
+        mCamera.setParameters(parameters);
+    }
     /**
      * Setup the camera parameters
      */
@@ -587,11 +595,8 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
 
+        parameters.setFlashMode(mFlashMode);
 
-        List<String> flashModes = parameters.getSupportedFlashModes();
-        if (flashModes != null && flashModes.contains(mFlashMode)) {
-            parameters.setFlashMode(mFlashMode);
-        }
         // Lock in the changes
         mCamera.setParameters(parameters);
     }
