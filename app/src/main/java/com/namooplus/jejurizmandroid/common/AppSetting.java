@@ -22,13 +22,13 @@ public class AppSetting {
     ////////////////////////////////////////////사용자 설정이 가능한 변수 ///////////////////////////
 
     //조도, 위치 등 정보 새로고침 주기
-    public static final int INTERVAL_MAP_REFRESH = 2000;
+    public static final int INTERVAL_MAP_REFRESH = 1000;
 
     //샘플링 이미지 사이즈
     public static final int IMAGE_SAMPLE_SIZE = 8; //8배 축소
 
     //같은 업체인지 구분하는 최소 거리
-    public static final int SAME_STORE_MIN_DISTANCE = 1000;
+    public static final int SAME_STORE_MIN_DISTANCE = 100;
 
     //숫자 구분 문자열로 제목입력에 사용하면 안된다.
     public static final String NAMOO_STRING_SPLIT = "_";

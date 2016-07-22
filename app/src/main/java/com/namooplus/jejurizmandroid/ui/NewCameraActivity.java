@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -21,6 +18,8 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -121,6 +120,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
     private float mLightValue;
     private float mCompassValue;
+    private float mViewCompass;
 
     private int mOrientation;
     private boolean isRunJob;
@@ -213,7 +213,8 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 long start = System.nanoTime();
                 int rotation = getPhotoRotation();
                 String path = null;
-                if (rotation != 0) {
+                path = Utils.saveByteToFile(data);
+                /*if (rotation != 0) {
                     Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                     Bitmap oldBitmap = bitmap;
 
@@ -229,8 +230,9 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 } else {
                     path = Utils.saveByteToFile(data);
                 }
-
+*/
                 if (path != null) {
+                    Log.i("HS","save Orientation:" + mOrientation);
                     mImageList.add(new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue, mCompassValue, mOrientation));
                 }
             }
@@ -335,6 +337,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 mLightValue = mLightInfo.getmLightValue();
                 mCompassValue = mCompass.getDirection();
 
+
                 if (mTxLocation != null) {
                     mTxLocation.setText("Lat : " + mCurrentLat + " Lon : " + mCurrentLon);
                     mTxLight.setText("조도:" + mLightValue);
@@ -343,6 +346,20 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                     mCtxLight.setText("조도:" + mLightValue);
                 }
 
+                float current = mCompass.getAzimuth();
+                Log.i("HS", "current :" + current + ":" + mCompassValue);
+
+                //나침반 에니메이션 셋팅
+                Animation an = new RotateAnimation(-mViewCompass, -current,
+                        Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                mViewCompass = current;
+
+                an.setDuration(1000);
+                an.setRepeatCount(0);
+                an.setFillAfter(true);
+
+                mCompass.arrowView.startAnimation(an);
+                Log.i("HS","update Orientation:" + mOrientation);
                 mOrientation = getResources().getConfiguration().orientation;
             }
         });
@@ -576,6 +593,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         parameters.setFlashMode(mFlashMode);
         mCamera.setParameters(parameters);
     }
+
     /**
      * Setup the camera parameters
      */

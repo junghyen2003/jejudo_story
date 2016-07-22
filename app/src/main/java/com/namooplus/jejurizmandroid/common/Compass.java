@@ -12,8 +12,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 import android.view.Surface;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
 //TODO 추후에 나침반, GSP, 조도 값 3가지 모두 한 클래스로 통합 관리
@@ -59,7 +57,7 @@ public class Compass implements SensorEventListener {
     }
 
     public float getAzimuth() {
-        return currectAzimuth;
+        return azimuth;
     }
 
     private void configureDeviceAngle() {
@@ -138,17 +136,18 @@ public class Compass implements SensorEventListener {
             return;
         }
 
+/*
         //나침반 에니메이션 셋팅
         Animation an = new RotateAnimation(-currectAzimuth, -azimuth,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         currectAzimuth = azimuth;
 
-        an.setDuration(1000);
+        an.setDuration(2000);
         an.setRepeatCount(0);
         an.setFillAfter(true);
 
         arrowView.startAnimation(an);
-
+*/
     }
 
     @Override
