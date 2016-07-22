@@ -81,9 +81,9 @@ public class CameraListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 if(mImageList.get(position).isChecked()) {
-                    mImageList.get(position).setChecked(false);
+                    mAdapter.getItem(position).setChecked(false);
                 } else {
-                    mImageList.get(position).setChecked(true);
+                    mAdapter.getItem(position).setChecked(true);
                 }
 
                 mAdapter.notifyDataSetChanged();
@@ -174,15 +174,16 @@ public class CameraListActivity extends AppCompatActivity {
     @OnClick(R.id.activity_camera_list_button_ok)
     public void onClickOkButton() {
         //체크된 정보만 넘기기
+
         ArrayList<ImageInfoModel> newList = new ArrayList<>();
-        for(ImageInfoModel item : mImageList) {
-            if(item.isChecked()) {
-                newList.add(item);
+        for(int i = 0; i < mAdapter.getCount(); i++) {
+            if(mAdapter.getItem(i).isChecked()) {
+                newList.add(mAdapter.getItem(i));
             }
         }
 
         Intent i = new Intent(this, ImageDetailActivity.class);
-        i.putParcelableArrayListExtra("datas", mImageList);
+        i.putParcelableArrayListExtra("datas", newList);
         startActivityForResult(i, AppSetting.ACTIVITY_CODE_IMAGE_DETAIL);
     }
 

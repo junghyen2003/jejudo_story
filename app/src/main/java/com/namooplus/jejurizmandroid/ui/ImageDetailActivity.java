@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -186,7 +187,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17));
 
             mo = new MarkerOptions();
-            mo.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+            mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_gps_point));
             mo.position(latlng);
             mMarker = map.addMarker(mo);
 
@@ -307,7 +308,13 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                         + "(" + ++nextNum + ")" + IMAGE_STRING_FORMAT;
 
                 //원래 파일에서 복사하기
-                Utils.copyFile(new File(item.getFilePath()), new File(finalPath));
+                File finalImageFile = new File(finalPath);
+                Utils.copyFile(new File(item.getFilePath()), finalImageFile);
+
+                ExifInterface exifi = new ExifInterface(finalImageFile.getAbsolutePath());
+                exifi.setAttribute(ExifInterface.TAG_GPS_LATITUDE, String.valueOf(mCurrentLat));
+                exifi.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, String.valueOf(mCurrentLong));
+                exifi.saveAttributes();
 
                 //변경된 주소 저장
                 item.setFilePath(finalPath);
