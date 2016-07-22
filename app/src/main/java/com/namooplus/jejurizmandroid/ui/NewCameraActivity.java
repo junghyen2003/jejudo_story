@@ -5,15 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -210,30 +215,43 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
-                long start = System.nanoTime();
-                int rotation = getPhotoRotation();
-                String path = null;
-                path = Utils.saveByteToFile(data);
-                /*if (rotation != 0) {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    Bitmap oldBitmap = bitmap;
+                try {
+                    int rotation = getPhotoRotation();
+                    Log.i("HS", "rotation : " + rotation);
+                    String path = null;
 
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(rotation);
+                    //세로로 찍은 사진은
+                    if(rotation == 0) {
+                        rotation = 90;
+                    } else if(rotation == 90) {
+                        rotation = 0;
+                    }
 
-                    bitmap = Bitmap.createBitmap(
-                            oldBitmap, 0, 0, oldBitmap.getWidth(), oldBitmap.getHeight(), matrix, false
-                    );
+                    if (rotation != 0) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        Bitmap oldBitmap = bitmap;
 
-                    oldBitmap.recycle();
-                    path = Utils.saveBitmapToFile(bitmap);
-                } else {
-                    path = Utils.saveByteToFile(data);
-                }
-*/
-                if (path != null) {
-                    Log.i("HS","save Orientation:" + mOrientation);
-                    mImageList.add(new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue, mCompassValue, mOrientation));
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(rotation);
+
+                        bitmap = Bitmap.createBitmap(
+                                oldBitmap, 0, 0, oldBitmap.getWidth(), oldBitmap.getHeight(), matrix, false
+                        );
+
+                        oldBitmap.recycle();
+                        path = Utils.saveBitmapToFile(bitmap);
+                    } else {
+                        path = Utils.saveByteToFile(data);
+                    }
+                    if (path != null) {
+                        ExifInterface exifi = new ExifInterface(path);
+                        exifi.setAttribute(ExifInterface.TAG_GPS_LATITUDE, String.valueOf(mCurrentLat));
+                        exifi.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, String.valueOf(mCurrentLon));
+                        exifi.saveAttributes();
+                        mImageList.add(new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue, mCompassValue, mOrientation));
+                    }
+                } catch (Exception e) {
+
                 }
             }
         });
@@ -347,7 +365,6 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 }
 
                 float current = mCompass.getAzimuth();
-                Log.i("HS", "current :" + current + ":" + mCompassValue);
 
                 //나침반 에니메이션 셋팅
                 Animation an = new RotateAnimation(-mViewCompass, -current,
@@ -359,7 +376,6 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 an.setFillAfter(true);
 
                 mCompass.arrowView.startAnimation(an);
-                Log.i("HS","update Orientation:" + mOrientation);
                 mOrientation = getResources().getConfiguration().orientation;
             }
         });
@@ -574,17 +590,22 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
 
     private int getPhotoRotation() {
-        int rotation;
-        int orientation = mOrientationListener.getRememberedNormalOrientation();
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(mCameraID, info);
-
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (info.orientation - orientation + 360) % 360;
-        } else {
-            rotation = (info.orientation + orientation) % 360;
+        Display display = getWindowManager().getDefaultDisplay();
+        int rotation = 0;
+        switch (display.getRotation()) {
+            case Surface.ROTATION_0:
+                rotation = 0;
+                break;
+            case Surface.ROTATION_90:
+                rotation = 90;
+                break;
+            case Surface.ROTATION_180:
+                rotation = 180;
+                break;
+            case Surface.ROTATION_270:
+                rotation = 270;
+                break;
         }
-
         return rotation;
     }
 

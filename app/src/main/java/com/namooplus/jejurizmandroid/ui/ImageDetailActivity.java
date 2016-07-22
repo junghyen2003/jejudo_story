@@ -4,7 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.media.ExifInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -310,11 +309,6 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
                 //원래 파일에서 복사하기
                 File finalImageFile = new File(finalPath);
                 Utils.copyFile(new File(item.getFilePath()), finalImageFile);
-
-                ExifInterface exifi = new ExifInterface(finalImageFile.getAbsolutePath());
-                exifi.setAttribute(ExifInterface.TAG_GPS_LATITUDE, String.valueOf(mCurrentLat));
-                exifi.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, String.valueOf(mCurrentLong));
-                exifi.saveAttributes();
 
                 //변경된 주소 저장
                 item.setFilePath(finalPath);
