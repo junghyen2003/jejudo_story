@@ -1,3 +1,8 @@
 <resources>
+
     <string name="app_name">제주도 이야기</string>
+
+    <string name="activity_intro_main_title">찍고찍고 찍어봐~</string>
+
+    <string name="dialog_explanation_no_again">다시 보지 않기</string>
 </resources>
