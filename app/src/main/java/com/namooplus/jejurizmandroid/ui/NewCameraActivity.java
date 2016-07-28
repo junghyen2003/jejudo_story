@@ -208,6 +208,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
             mGpsInfo.initLocation();
         }
 
+        mOrientationListener.enable();
     }
 
     @Override
@@ -221,9 +222,9 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                     String path = null;
 
                     //세로로 찍은 사진은
-                    if(rotation == 0) {
+                    if (rotation == 0) {
                         rotation = 90;
-                    } else if(rotation == 90) {
+                    } else if (rotation == 90) {
                         rotation = 0;
                     }
 
@@ -245,6 +246,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                     }
                     if (path != null) {
                         ExifInterface exifi = new ExifInterface(path);
+                        Log.i("HS", "exifi ori :" + exifi.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1));
                         exifi.setAttribute(ExifInterface.TAG_GPS_LATITUDE, String.valueOf(mCurrentLat));
                         exifi.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, String.valueOf(mCurrentLon));
                         exifi.saveAttributes();
@@ -736,6 +738,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
         @Override
         public void onOrientationChanged(int orientation) {
+            Log.i("HS","onOrientationChanged : " + orientation);
             if (orientation != ORIENTATION_UNKNOWN) {
                 mCurrentNormalizedOrientation = normalize(orientation);
             }

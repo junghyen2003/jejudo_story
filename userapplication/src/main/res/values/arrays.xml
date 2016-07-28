@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 레스토랑 리스트 -->
+    <string-array name="menu_select_restaurant_kind_image">
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+    </string-array>
+
+    <string-array name="menu_select_restaurant_kind_title">
+        <item>전체음식</item>
+        <item>한국음식</item>
+        <item>중국음식</item>
+        <item>양식(패스트푸드)</item>
+        <item>일식(회)</item>
+        <item>분식</item>
+        <item>카페</item>
+        <item>세계음식</item>
+    </string-array>
+
+    <string-array name="menu_select_restaurant_situation_image">
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+    </string-array>
+
+    <string-array name="menu_select_restaurant_situation_title">
+        <item>전체음식</item>
+        <item>1인식사</item>
+        <item>커플</item>
+        <item>가족</item>
+        <item>단체</item>
+        <item>다이어트</item>
+        <item>건강식단</item>
+        <item>채시주의</item>
+    </string-array>
+
+
+    <!-- 관광지 리스트 -->
+    <string-array name="menu_select_tour_kind_image">
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+    </string-array>
+
+    <string-array name="menu_select_tour_kind_title">
+        <item>전체 관광지</item>
+        <item>박물관/전시관</item>
+        <item>테마공원</item>
+        <item>유적지/사적지</item>
+        <item>레저 스포츠</item>
+        <item>오름/폭포/계곡</item>
+        <item>해수욕장/섬</item>
+        <item>회의/체육시설</item>
+    </string-array>
+
+    <string-array name="menu_select_tour_situation_image">
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+    </string-array>
+
+    <string-array name="menu_select_tour_situation_title">
+        <item>전체 관광지</item>
+        <item>1인</item>
+        <item>커플</item>
+        <item>가족</item>
+        <item>단체</item>
+        <item>TOP10</item>
+        <item>힐링</item>
+        <item>숨겨진 보물</item>
+    </string-array>
+
+    <!-- 쇼핑 -->
+    <string-array name="menu_select_shopping_image">
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+        <item>ic_launcher</item>
+    </string-array>
+
+    <string-array name="menu_select_shopping_title">
+        <item>전체쇼핑</item>
+        <item>전통시장(오일장)</item>
+        <item>면세점</item>
+        <item>쇼핑센터(마트)</item>
+        <item>수산시장</item>
+        <item>특산물판매장</item>
+        <item>기타샵</item>
+        <item>중국인전용</item>
+    </string-array>
+
+</resources>

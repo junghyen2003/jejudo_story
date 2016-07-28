@@ -17,6 +17,7 @@
         </activity>
 
         <activity android:name=".ui.MainActivity"/>
+        <activity android:name=".ui.SearchRestaurantActivity"/>
     </application>
 
 </manifest>
