@@ -14,4 +14,15 @@
 
     <string name="activity_search_restaurant_title">식당</string>
 
+    <string name="activity_camera_gps_setting">GPS 셋팅</string>
+    <string name="activity_camera_gps_message">GPS 페이지로 가서 GPS 켜세요</string>
+    <string name="activity_camera_gps_go">셋팅하러가기</string>
+    <string name="activity_camera_gps_no">취소</string>
+    <string name="activity_camera_gps_fail">GPS 값을 가져 올 수 없습니다.</string>
+    <string name="activity_camera_location_permission">"권한을 수락하셔야 합니다.</string>
+    <string name="activity_camera_click_taken">촬영!</string>
+
+    <string name="activity_compare_title">이미지 비교</string>
+
+
 </resources>

@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    서버 활성화 되면 테스트 해보기
+
     @OnClick(R.id.activity_main_menu_restaurant)
     public void clickRestaurant() {
         Intent i = new Intent(this, SearchRestaurantActivity.class);
@@ -64,7 +66,8 @@ public class MainActivity extends AppCompatActivity {
     }
     @OnClick(R.id.activity_main_menu_camera)
     public void clickCamera() {
-
+        Intent i = new Intent(this, NewCameraActivity.class);
+        startActivity(i);
     }
 
 }

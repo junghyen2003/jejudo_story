@@ -1,0 +1,80 @@
+package com.namoo.plus.jejurizmapp.model;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+/**
+ * Created by HeungSun-AndBut on 2016. 7. 28..
+ */
+
+
+
+public class StoreModel implements Parcelable {
+    private int id;
+    private String name;
+    private String mainImgae;
+
+    public StoreModel(Parcel source) {
+        readFromParcel(source);
+    }
+
+    public StoreModel(int id, String name, String mainImgae) {
+        this.id = id;
+        this.name = name;
+        this.mainImgae = mainImgae;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeString(mainImgae);
+    }
+
+    private void readFromParcel(Parcel source) {
+        id = source.readInt();
+        name = source.readString();
+        mainImgae = source.readString();
+    }
+
+    public static final Creator<StoreModel> CREATOR = new Creator<StoreModel>() {
+        @Override
+        public StoreModel createFromParcel(Parcel source) {
+            return new StoreModel(source);
+        }
+
+        @Override
+        public StoreModel[] newArray(int size) {
+            return new StoreModel[size];
+        }
+    };
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMainImgae() {
+        return mainImgae;
+    }
+
+    public void setMainImgae(String mainImgae) {
+        this.mainImgae = mainImgae;
+    }
+}
