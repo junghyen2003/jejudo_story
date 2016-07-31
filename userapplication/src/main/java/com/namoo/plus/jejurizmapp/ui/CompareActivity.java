@@ -29,9 +29,10 @@ import com.namoo.plus.jejurizmapp.ui.view.BaseRecyclerViewAdapter;
 import com.namoo.plus.jejurizmapp.ui.view.SpacesItemDecoration;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -43,7 +44,6 @@ import rx.schedulers.Schedulers;
 /**
  * Created by HeungSun-AndBut on 2016. 7. 29..
  */
-
 public class CompareActivity extends AppCompatActivity {
 
     @BindView(R.id.activity_compare_main_image)
@@ -59,13 +59,15 @@ public class CompareActivity extends AppCompatActivity {
     public ImageView mIvNextCheck;
 
     private ImageAdapater mAdapter;
-    private ArrayList<StoreModel> storeList;
+    private List<StoreModel> storeList;
     private int mSelectedItem = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compare);
+
+        ButterKnife.bind(this);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.activity_compare_title);
@@ -80,10 +82,14 @@ public class CompareActivity extends AppCompatActivity {
 
     @OnClick(R.id.activity_compare_check)
     public void onClickNextCheck() {
-        Intent i = new Intent(CompareActivity.this, StoreDetailActivity.class);
-        i.putExtra("data", storeList.get(mSelectedItem));
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
+        if (mSelectedItem == -1) {
+            Toast.makeText(CompareActivity.this, "사진이 클릭되지 않았습니다.", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent i = new Intent(CompareActivity.this, StoreDetailActivity.class);
+            i.putExtra("data", storeList.get(mSelectedItem));
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        }
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -98,7 +104,7 @@ public class CompareActivity extends AppCompatActivity {
 
     private void setRecycler() {
 
-        if(!storeList.isEmpty()) {
+        if (!storeList.isEmpty()) {
             LinearLayoutManager mLayoutManager_Linear = new LinearLayoutManager(this);
             mLayoutManager_Linear.setOrientation(LinearLayoutManager.HORIZONTAL);
 
@@ -112,7 +118,7 @@ public class CompareActivity extends AppCompatActivity {
 
         } else {
             //TODO 검색된 데이터가 없을 경우
-            Toast.makeText(CompareActivity.this, "검색 결과가 없습니다",Toast.LENGTH_SHORT).show();
+            Toast.makeText(CompareActivity.this, "검색 결과가 없습니다", Toast.LENGTH_SHORT).show();
         }
         mProgressBar.setVisibility(View.GONE);
     }
@@ -139,17 +145,18 @@ public class CompareActivity extends AppCompatActivity {
 
                     @Override
                     public void onCompleted() {
-                        Log.i("HS","onCompleted");
+                        Log.i("HS", "onCompleted");
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.i("HS","onError :" + e.getMessage());
+                        Log.i("HS", "onError :" + e.getMessage());
                     }
+
                     @Override
                     public void onNext(StoreListResponse storeListResponse) {
-                        Log.i("HS","storeListResponse :" + storeListResponse.getCount());
-                        if(storeListResponse.getCount() > 0 ) {
+                        Log.i("HS", "storeListResponse :" + storeListResponse.getCount());
+                        if (storeListResponse.getCount() > 0) {
                             storeList = storeListResponse.getData();
                         }
                         setRecycler();
@@ -163,7 +170,7 @@ public class CompareActivity extends AppCompatActivity {
 
         Activity activity;
 
-        public ImageAdapater(Activity activity, ArrayList<StoreModel> mStore) {
+        public ImageAdapater(Activity activity, List<StoreModel> mStore) {
             super(activity, mStore);
             this.activity = activity;
 
@@ -175,19 +182,10 @@ public class CompareActivity extends AppCompatActivity {
             StoreModel store = getItem(position);
 
             Glide.with(activity)
-                    .load(store.getMainImgae())
+                    .load(store.getMainImage())
                     .dontAnimate()
                     .centerCrop()
                     .into(holder.mImage);
-
-            holder.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mSelectedItem = position;
-                    //TODO 체크 아이콘 만들기
-                    Toast.makeText(CompareActivity.this, "클릭 :" + position, Toast.LENGTH_SHORT).show();
-                }
-            });
 
         }
 
@@ -200,20 +198,21 @@ public class CompareActivity extends AppCompatActivity {
         }
 
 
-        class SelectedPhotoHolder extends RecyclerView.ViewHolder {
+        class SelectedPhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
             ImageView mImage;
-            View.OnClickListener onClickListener;
 
             public SelectedPhotoHolder(View itemView) {
                 super(itemView);
+                itemView.setOnClickListener(this);
                 mImage = (ImageView) itemView.findViewById(R.id.listitem_recycle_image);
-                mImage.setOnClickListener(onClickListener);
-
             }
 
-            public void setOnClickListener(View.OnClickListener onClickListener) {
-                this.onClickListener = onClickListener;
+            @Override
+            public void onClick(View view) {
+                mSelectedItem = getAdapterPosition();
+                //TODO 체크 아이콘 만들기
+                Toast.makeText(CompareActivity.this, "클릭 :" + mSelectedItem, Toast.LENGTH_SHORT).show();
             }
         }
     }

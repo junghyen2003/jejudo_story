@@ -26,7 +26,6 @@ import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -98,9 +97,6 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     @BindView(R.id.activity_camera_preview)
     public SquareCameraPreview mPreviewView;
 
-    @BindView(R.id.activity_camera_progressbar)
-    public ProgressBar mProgress;
-
     private Compass mCompass;
     private GpsInfo mGpsInfo;
     private LightInfo mLightInfo;
@@ -165,7 +161,6 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     @Override
     public void onPictureTaken(final byte[] data, Camera camera) {
         try {
-            mProgress.setVisibility(View.VISIBLE);
             int rotation = getPhotoRotation();
             String path = null;
 
@@ -199,8 +194,11 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 exifi.saveAttributes();
             }
 
-            ImageInfoModel imageInfo = new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue
-            , mCompassValue, mOrientation);
+            //ImageInfoModel imageInfo = new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue
+           // , mCompassValue, mOrientation);
+
+            ImageInfoModel imageInfo = new ImageInfoModel(path, 37.5665350, 126.9779690, mLightValue
+                    , mCompassValue, mOrientation);
 
             Intent i = new Intent(this, CompareActivity.class);
             i.putExtra("data", imageInfo);

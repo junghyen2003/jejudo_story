@@ -12,16 +12,19 @@ import android.os.Parcelable;
 public class StoreModel implements Parcelable {
     private int id;
     private String name;
-    private String mainImgae;
+    private String mainImage;
 
+    public StoreModel() {
+
+    }
     public StoreModel(Parcel source) {
         readFromParcel(source);
     }
 
-    public StoreModel(int id, String name, String mainImgae) {
+    public StoreModel(int id, String name, String mainImage) {
         this.id = id;
         this.name = name;
-        this.mainImgae = mainImgae;
+        this.mainImage = mainImage;
     }
 
     @Override
@@ -33,13 +36,13 @@ public class StoreModel implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(name);
-        dest.writeString(mainImgae);
+        dest.writeString(mainImage);
     }
 
     private void readFromParcel(Parcel source) {
         id = source.readInt();
         name = source.readString();
-        mainImgae = source.readString();
+        mainImage = source.readString();
     }
 
     public static final Creator<StoreModel> CREATOR = new Creator<StoreModel>() {
@@ -70,11 +73,11 @@ public class StoreModel implements Parcelable {
         this.name = name;
     }
 
-    public String getMainImgae() {
-        return mainImgae;
+    public String getMainImage() {
+        return mainImage;
     }
 
-    public void setMainImgae(String mainImgae) {
-        this.mainImgae = mainImgae;
+    public void setMainImage(String mainImage) {
+        this.mainImage = mainImage;
     }
 }

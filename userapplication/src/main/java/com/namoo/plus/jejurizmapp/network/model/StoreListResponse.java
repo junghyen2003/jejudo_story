@@ -6,15 +6,19 @@ package com.namoo.plus.jejurizmapp.network.model;
 
 import com.namoo.plus.jejurizmapp.model.StoreModel;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class StoreListResponse {
+
     private int code;
     private String msg;
     private int count;
-    private ArrayList<StoreModel> data;
+    private List<StoreModel> data;
 
-    public StoreListResponse(int code, String msg, int count, ArrayList<StoreModel> data) {
+    public StoreListResponse() {
+
+    }
+    public StoreListResponse(int code, String msg, int count, List<StoreModel> data) {
         this.code = code;
         this.msg = msg;
         this.count = count;
@@ -45,11 +49,11 @@ public class StoreListResponse {
         this.count = count;
     }
 
-    public ArrayList<StoreModel> getData() {
+    public List<StoreModel> getData() {
         return data;
     }
 
-    public void setData(ArrayList<StoreModel> data) {
+    public void setData(List<StoreModel> data) {
         this.data = data;
     }
 }

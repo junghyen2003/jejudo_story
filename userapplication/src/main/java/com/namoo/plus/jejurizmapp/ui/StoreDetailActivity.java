@@ -49,7 +49,7 @@ public class StoreDetailActivity extends AppCompatActivity {
         StoreModel simStore = getIntent().getParcelableExtra("data");
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(mStore.getName());
+        getSupportActionBar().setTitle(simStore.getName());
 
         getImageDetail(simStore);
     }
