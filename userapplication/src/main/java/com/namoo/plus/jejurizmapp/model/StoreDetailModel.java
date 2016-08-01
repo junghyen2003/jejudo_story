@@ -13,15 +13,6 @@ public class StoreDetailModel {
     private String mainImage;
     private ArrayList<String> images;
 
-    public StoreDetailModel() {}
-    public StoreDetailModel(int id, String name, String summary, String mainImage, ArrayList<String> images) {
-        this.id = id;
-        this.name = name;
-        this.summary = summary;
-        this.mainImage = mainImage;
-        this.images = images;
-    }
-
     public int getId() {
         return id;
     }

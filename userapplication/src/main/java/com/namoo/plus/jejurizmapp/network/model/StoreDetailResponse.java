@@ -11,12 +11,6 @@ public class StoreDetailResponse {
     private String msg;
     private StoreDetailModel data;
 
-    public StoreDetailResponse(int code, String msg, StoreDetailModel data) {
-        this.code = code;
-        this.msg = msg;
-        this.data = data;
-    }
-
     public int getCode() {
         return code;
     }
