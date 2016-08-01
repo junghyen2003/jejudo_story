@@ -15,16 +15,6 @@ public class StoreListResponse {
     private int count;
     private List<StoreModel> data;
 
-    public StoreListResponse() {
-
-    }
-    public StoreListResponse(int code, String msg, int count, List<StoreModel> data) {
-        this.code = code;
-        this.msg = msg;
-        this.count = count;
-        this.data = data;
-    }
-
     public int getCode() {
         return code;
     }
