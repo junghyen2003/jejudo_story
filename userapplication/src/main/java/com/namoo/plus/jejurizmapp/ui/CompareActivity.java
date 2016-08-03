@@ -141,9 +141,9 @@ public class CompareActivity extends AppCompatActivity {
                     public void onNext(Response<StoreListResponse> response) {
                         if (response.isSuccessful()) {
                             if (response.code() == 200) {
-                                storeList = response.body().getData();
+                                //storeList = response.body().getData();
                                 mAdapter.addItems(response.body().getData());
-                                mAdapter.notifyDataSetChanged();
+                                //mAdapter.notifyDataSetChanged();
                             } else if (response.code() == 204) {
                                 Toast.makeText(CompareActivity.this, R.string.activity_compare_no_data, Toast.LENGTH_SHORT).show();
                             } else {

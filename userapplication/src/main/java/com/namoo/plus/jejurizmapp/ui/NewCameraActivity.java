@@ -31,12 +31,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.namoo.plus.jejurizmapp.R;
-import com.namoo.plus.jejurizmapp.common.Constants;
 import com.namoo.plus.jejurizmapp.common.Utils;
 import com.namoo.plus.jejurizmapp.model.ImageInfoModel;
 import com.namoo.plus.jejurizmapp.model.ImageParameters;
-import com.namoo.plus.jejurizmapp.network.ServiceBuilder;
-import com.namoo.plus.jejurizmapp.network.service.ImageService;
 import com.namoo.plus.jejurizmapp.sensor.Compass;
 import com.namoo.plus.jejurizmapp.sensor.GpsInfo;
 import com.namoo.plus.jejurizmapp.sensor.LightInfo;
@@ -120,7 +117,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     private int mCameraID;
     private Camera mCamera;
 
-    ImageService imageService;
+    //ImageService imageService;
 
     private ImageParameters mImageParameters = new ImageParameters();
 
@@ -159,8 +156,8 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
         mOrientationListener = new CameraOrientationListener(this);
 
-        imageService = ServiceBuilder.createService(ImageService.class,
-                Constants.NAMOO_PLUS_BASE_URL);
+//        imageService = ServiceBuilder.createService(ImageService.class,
+//                Constants.NAMOO_PLUS_BASE_URL);
     }
 
 
