@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -29,6 +31,7 @@ import com.namoo.plus.jejurizmapp.ui.view.BaseRecyclerViewAdapter;
 import com.namoo.plus.jejurizmapp.ui.view.SpacesItemDecoration;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -37,6 +40,7 @@ import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import retrofit2.Response;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -59,31 +63,30 @@ public class CompareActivity extends AppCompatActivity {
     public ImageView mIvNextCheck;
 
     private ImageAdapater mAdapter;
-    private List<StoreModel> storeList;
+    private List<StoreModel> storeList = new ArrayList<>();
     private int mSelectedItem = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compare);
-
         ButterKnife.bind(this);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.activity_compare_title);
-        ImageInfoModel imageInfoModel = getIntent().getParcelableExtra("data");
 
+        ImageInfoModel imageInfoModel = getIntent().getParcelableExtra("data");
+        mIvMainImage.setImageBitmap(Utils.decodeSampledBitmapFromResource(imageInfoModel.getFilePath(), 4));
         getSearchImage(imageInfoModel);
 
-        Glide.with(this)
-                .load(imageInfoModel.getFilePath())
-                .into(mIvMainImage);
+        setRecycler();
+        //TODO The application may be doing too much work on its main thread. 어디서 나는거지!?!?
+
     }
 
     @OnClick(R.id.activity_compare_check)
     public void onClickNextCheck() {
         if (mSelectedItem == -1) {
-            Toast.makeText(CompareActivity.this, "사진이 클릭되지 않았습니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CompareActivity.this, R.string.activity_compare_no_selected_image, Toast.LENGTH_SHORT).show();
         } else {
             Intent i = new Intent(CompareActivity.this, StoreDetailActivity.class);
             i.putExtra("data", storeList.get(mSelectedItem));
@@ -103,24 +106,16 @@ public class CompareActivity extends AppCompatActivity {
     }
 
     private void setRecycler() {
+        LinearLayoutManager mLayoutManager_Linear = new LinearLayoutManager(this);
+        mLayoutManager_Linear.setOrientation(LinearLayoutManager.HORIZONTAL);
 
-        if (!storeList.isEmpty()) {
-            LinearLayoutManager mLayoutManager_Linear = new LinearLayoutManager(this);
-            mLayoutManager_Linear.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mRvHorizonList.setLayoutManager(mLayoutManager_Linear);
+        mRvHorizonList.addItemDecoration(new SpacesItemDecoration(
+                Utils.dpToPx(CompareActivity.this, 5), SpacesItemDecoration.TYPE_HORIZONTAL));
+        mRvHorizonList.setHasFixedSize(true);
 
-            mRvHorizonList.setLayoutManager(mLayoutManager_Linear);
-            mRvHorizonList.addItemDecoration(new SpacesItemDecoration(
-                    Utils.dpToPx(CompareActivity.this, 5), SpacesItemDecoration.TYPE_HORIZONTAL));
-            mRvHorizonList.setHasFixedSize(true);
-
-            mAdapter = new ImageAdapater(CompareActivity.this, storeList);
-            mRvHorizonList.setAdapter(mAdapter);
-
-        } else {
-            //TODO 검색된 데이터가 없을 경우
-            Toast.makeText(CompareActivity.this, "검색 결과가 없습니다", Toast.LENGTH_SHORT).show();
-        }
-        mProgressBar.setVisibility(View.GONE);
+        mAdapter = new ImageAdapater(CompareActivity.this, storeList);
+        mRvHorizonList.setAdapter(mAdapter);
     }
 
 
@@ -141,39 +136,45 @@ public class CompareActivity extends AppCompatActivity {
         imageService.getSearchImageData(lat, lng, light, compass, ori, body)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<StoreListResponse>() {
+                .subscribe(new Subscriber<Response<StoreListResponse>>() {
+                    @Override
+                    public void onNext(Response<StoreListResponse> response) {
+                        if (response.isSuccessful()) {
+                            if (response.code() == 200) {
+                                storeList = response.body().getData();
+                                mAdapter.addItems(response.body().getData());
+                                mAdapter.notifyDataSetChanged();
+                            } else if (response.code() == 204) {
+                                Toast.makeText(CompareActivity.this, R.string.activity_compare_no_data, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.i("HS", "error : " + response.code() + ":" + response.message());
+                                Toast.makeText(CompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.i("HS", "error : " + response.code() + ":" + response.message());
+                            Toast.makeText(CompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
+                        }
+                    }
 
                     @Override
                     public void onCompleted() {
-                        Log.i("HS", "onCompleted");
+                        mProgressBar.setVisibility(View.GONE);
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.i("HS", "onError :" + e.getMessage());
+                        Log.i("HS", "error : " + e.getMessage());
+                        Toast.makeText(CompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
                     }
 
-                    @Override
-                    public void onNext(StoreListResponse storeListResponse) {
-                        Log.i("HS", "storeListResponse :" + storeListResponse.getCount());
-                        if (storeListResponse.getCount() > 0) {
-                            storeList = storeListResponse.getData();
-                        }
-                        setRecycler();
-                    }
                 });
-
     }
-
 
     public class ImageAdapater extends BaseRecyclerViewAdapter<StoreModel, ImageAdapater.SelectedPhotoHolder> {
 
-        Activity activity;
 
         public ImageAdapater(Activity activity, List<StoreModel> mStore) {
             super(activity, mStore);
-            this.activity = activity;
-
         }
 
         @Override
@@ -181,8 +182,9 @@ public class CompareActivity extends AppCompatActivity {
 
             StoreModel store = getItem(position);
 
-            Glide.with(activity)
+            Glide.with(getContext())
                     .load(store.getMainImage())
+                    .override(100,100)
                     .dontAnimate()
                     .centerCrop()
                     .into(holder.mImage);
@@ -198,21 +200,39 @@ public class CompareActivity extends AppCompatActivity {
         }
 
 
-        class SelectedPhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        class SelectedPhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
             ImageView mImage;
+            CheckBox mCheckBox;
 
             public SelectedPhotoHolder(View itemView) {
                 super(itemView);
                 itemView.setOnClickListener(this);
                 mImage = (ImageView) itemView.findViewById(R.id.listitem_recycle_image);
+                mCheckBox = (CheckBox) itemView.findViewById(R.id.listitem_recycle_checkbox);
+
+                mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                        if (isChecked) {
+                            mSelectedItem = getAdapterPosition();
+                        } else {
+                            mSelectedItem = -1;
+                        }
+                    }
+                });
+
             }
 
             @Override
             public void onClick(View view) {
-                mSelectedItem = getAdapterPosition();
-                //TODO 체크 아이콘 만들기
-                Toast.makeText(CompareActivity.this, "클릭 :" + mSelectedItem, Toast.LENGTH_SHORT).show();
+                if (mCheckBox.isChecked()) {
+                    mSelectedItem = -1;
+                    mCheckBox.setChecked(false);
+                } else {
+                    mSelectedItem = getAdapterPosition();
+                    mCheckBox.setChecked(true);
+                }
             }
         }
     }

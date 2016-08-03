@@ -2,6 +2,7 @@ package com.namoo.plus.jejurizmapp.common;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.File;
@@ -83,6 +84,19 @@ public class Utils {
 
     public static int dpToPx(Context c, int dp) {
         return (int) (dp * c.getResources().getSystem().getDisplayMetrics().density);
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(String path, int sampleSize) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+        // Calculate inSampleSize
+        options.inSampleSize = sampleSize;
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(path, options);
     }
 
 }

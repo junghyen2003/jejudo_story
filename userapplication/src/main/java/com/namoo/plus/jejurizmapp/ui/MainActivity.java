@@ -41,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
         if(!JPreference.getInstance(this).getReadExplanation()) {
             new ExplanationDialog().show(getSupportFragmentManager(), "");
         }
-
-
     }
 
     @OnClick(R.id.activity_main_menu_restaurant)

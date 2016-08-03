@@ -52,6 +52,17 @@ public class GpsInfo {
         }
     }
 
+    public void stopLocation() {
+        try {
+            if (locationManager != null) {
+                locationManager.removeUpdates(locationListener);
+            }
+        }catch (SecurityException e) {
+
+        }
+    }
+
+
     public Location initLocation() {
         try {
             if (checkLocation()) {

@@ -27,6 +27,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.namoo.plus.jejurizmapp.R;
@@ -55,6 +56,8 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.hardware.Camera.Parameters.FLASH_MODE_OFF;
 import static android.hardware.Camera.Parameters.FLASH_MODE_ON;
 import static com.namoo.plus.jejurizmapp.common.Constants.INTERVAL_MAP_REFRESH;
+import static com.namoo.plus.jejurizmapp.common.Constants.STANDARD_HEIGHT_SIZE;
+import static com.namoo.plus.jejurizmapp.common.Constants.STANDARD_WIDTH_SIZE;
 
 /**
  * Created by HeungSun-AndBut on 2016. 7. 18..
@@ -86,16 +89,19 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     public ImageButton mBtnTakePicture;
 
     @BindView(R.id.activity_camera_flash_image)
-    public ImageView mFlash;
+    public ImageView mBtnFlash;
 
     @BindView(R.id.activity_camera_gps_image)
-    public ImageView mGps;
+    public ImageView mBtnGps;
 
     @BindView(R.id.activity_camera_top_layout)
     public RelativeLayout mRlTopLayout;
 
     @BindView(R.id.activity_camera_preview)
     public SquareCameraPreview mPreviewView;
+
+    @BindView(R.id.activity_camera_log_text)
+    public TextView mLogText;
 
     private Compass mCompass;
     private GpsInfo mGpsInfo;
@@ -107,7 +113,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
     private int mOrientation;
     private boolean isRunJob;
-    private int ori;
+    private int mCurrentOri;
 
     private boolean mIsSafeToTakePhoto = false;
 
@@ -124,6 +130,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     private ArrayList<ImageInfoModel> mImageList;
 
     private String mFlashMode = FLASH_MODE_OFF;
+    private boolean mGpsMode = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -148,10 +155,9 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         //각종 센서값을 얻기 위한 초기화
         mCompass = new Compass(this);
         mLightInfo = new LightInfo(this);
+        mGpsInfo = new GpsInfo(this, locationListener);
 
         mOrientationListener = new CameraOrientationListener(this);
-
-        mOrientationListener.enable();
 
         imageService = ServiceBuilder.createService(ImageService.class,
                 Constants.NAMOO_PLUS_BASE_URL);
@@ -161,29 +167,20 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     @Override
     public void onPictureTaken(final byte[] data, Camera camera) {
         try {
-            int rotation = getPhotoRotation();
             String path = null;
-
-            //세로로 찍은 사진은
-            if (rotation == 0) {
-                rotation = 90;
-            } else if (rotation == 90) {
-                rotation = 0;
-            }
-
-            if (rotation != 0) {
+            mCurrentOri += 90;
+            if (mCurrentOri != 0) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 Bitmap oldBitmap = bitmap;
 
                 Matrix matrix = new Matrix();
-                matrix.postRotate(rotation);
+                matrix.postRotate(mCurrentOri);
 
                 bitmap = Bitmap.createBitmap(
                         oldBitmap, 0, 0, oldBitmap.getWidth(), oldBitmap.getHeight(), matrix, false
                 );
-
-                oldBitmap.recycle();
                 path = Utils.saveBitmapToFile(bitmap);
+                oldBitmap.recycle();
             } else {
                 path = Utils.saveByteToFile(data);
             }
@@ -195,7 +192,13 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
             }
 
             //ImageInfoModel imageInfo = new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue
-           // , mCompassValue, mOrientation);
+            //, mCompassValue, mOrientation);
+
+            Log.i("HS","최종 사진 데이터 ");
+            Log.i("HS","위도 경도 : " + mCurrentLat + "/" + mCurrentLon);
+            Log.i("HS","밝기 : " + mLightValue);
+            Log.i("HS","방향 : " + mCompassValue);
+            Log.i("HS","방향 : " + mOrientation);
 
             ImageInfoModel imageInfo = new ImageInfoModel(path, 37.5665350, 126.9779690, mLightValue
                     , mCompassValue, mOrientation);
@@ -265,17 +268,16 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         super.onStop();
         mCompass.stop();
         mLightInfo.stop();
+        mGpsInfo.stopLocation();
         isRunJob = false;
 
         mOrientationListener.disable();
-
         // stop the preview
         if (mCamera != null) {
             stopCameraPreview();
             mCamera.release();
             mCamera = null;
         }
-
         super.onStop();
 
     }
@@ -325,6 +327,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         public void onLocationChanged(Location location) {
             mCurrentLat = location.getLatitude();
             mCurrentLon = location.getLongitude();
+            mLogText.setText("위도 : " + mCurrentLat + " 경도 : " + mCurrentLon);
         }
 
         @Override
@@ -400,9 +403,6 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 finish();
             }
 
-            mGpsInfo = new GpsInfo(this, locationListener);
-            mGpsInfo.initLocation();
-
         }
     }
 
@@ -415,12 +415,37 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     public void flashClick(View v) {
         if (mFlashMode.equals(FLASH_MODE_OFF)) {
             mFlashMode = FLASH_MODE_ON;
-            mFlash.setImageResource(R.drawable.ic_flash_on_white_24dp);
+            mBtnFlash.setImageResource(R.drawable.ic_flash_on_white_24dp);
         } else {
             mFlashMode = FLASH_MODE_OFF;
-            mFlash.setImageResource(R.drawable.ic_flash_off_white_24dp);
+            mBtnFlash.setImageResource(R.drawable.ic_flash_off_white_24dp);
         }
         setFlashMode();
+    }
+
+    @OnClick(R.id.activity_camera_gps_image)
+    public void gpsClick(View v) {
+        if (mGpsMode) {
+            mGpsMode = false;
+            mBtnGps.setImageResource(R.drawable.ic_location_off_white_24dp);
+        } else {
+            mGpsMode = true;
+            mBtnGps.setImageResource(R.drawable.ic_location_on_white_24dp);
+        }
+        gpsUpdate();
+
+    }
+
+    private void gpsUpdate() {
+        if(mGpsMode) {
+            mGpsInfo.initLocation();
+            mLogText.setText("gps loading...");
+        } else {
+            if(mGpsInfo!= null) {
+                mLogText.setText("gps off");
+                mGpsInfo.stopLocation();
+            }
+        }
     }
 
     @Override
@@ -434,12 +459,13 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                         (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)))) {
             requestPermissions(ACTIVITY_CAMERA_PERMISSION, ACCESS_PERMISSION);
         } else {
-            mGpsInfo = new GpsInfo(this, locationListener);
-            mGpsInfo.initLocation();
+            gpsUpdate();
             if (mCamera == null) {
                 restartPreview();
             }
         }
+
+        mOrientationListener.enable();
     }
 
     @Override
@@ -605,7 +631,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         Camera.Size result = null;
         Collections.sort(sizes, Collections.reverseOrder(new SizeComparator()));
         for (Camera.Size entry : sizes) {
-            if (entry.height == 1080 || entry.width == 1920) {
+            if (entry.height == STANDARD_HEIGHT_SIZE || entry.width == STANDARD_WIDTH_SIZE) {
                 result = entry;
             } else {
                 continue;
@@ -630,8 +656,6 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
         if (mIsSafeToTakePhoto) {
             setSafeToTakePhoto(false);
-
-            mOrientationListener.rememberOrientation();
 
             // Shutter callback occurs after the image is captured. This can
             // be used to trigger a sound to let the user know that image is taken
@@ -660,21 +684,27 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         }
     }
 
-    private static class CameraOrientationListener extends OrientationEventListener {
+    private class CameraOrientationListener extends OrientationEventListener {
 
-        private int mCurrentNormalizedOrientation;
-        private int mRememberedNormalOrientation;
-
+        int saveOri = 0;
         public CameraOrientationListener(Context context) {
             super(context, SensorManager.SENSOR_DELAY_NORMAL);
         }
 
         @Override
         public void onOrientationChanged(int orientation) {
-            Log.i("HS", "onOrientationChanged : " + orientation);
-            if (orientation != ORIENTATION_UNKNOWN) {
-                mCurrentNormalizedOrientation = normalize(orientation);
+            mCurrentOri = normalize(orientation);
+            if(saveOri == 0 && mCurrentOri == 270) {
+                mBtnTakePicture.setRotation(90);
+                mBtnFlash.setRotation(90);
+                mBtnGps.setRotation(90);
+            } else if(saveOri == 270 && mCurrentOri == 0) {
+                mBtnTakePicture.setRotation(0);
+                mBtnFlash.setRotation(0);
+                mBtnGps.setRotation(0);
             }
+
+            saveOri = mCurrentOri;
         }
 
         /**
@@ -683,31 +713,26 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
          */
         private int normalize(int degrees) {
             if (degrees > 315 || degrees <= 45) {
+                mOrientation = 0;
                 return 0;
             }
 
             if (degrees > 45 && degrees <= 135) {
+                mOrientation = 1;
                 return 90;
             }
 
             if (degrees > 135 && degrees <= 225) {
+                mOrientation = 0;
                 return 180;
             }
 
             if (degrees > 225 && degrees <= 315) {
+                mOrientation = 1;
                 return 270;
             }
 
             throw new RuntimeException("The physics as we know them are no more. Watch out for anomalies.");
-        }
-
-        public void rememberOrientation() {
-            mRememberedNormalOrientation = mCurrentNormalizedOrientation;
-        }
-
-        public int getRememberedNormalOrientation() {
-            rememberOrientation();
-            return mRememberedNormalOrientation;
         }
     }
 

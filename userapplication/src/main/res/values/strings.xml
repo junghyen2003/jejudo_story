@@ -23,6 +23,10 @@
     <string name="activity_camera_click_taken">촬영!</string>
 
     <string name="activity_compare_title">이미지 비교</string>
+    <string name="activity_compare_no_selected_image">이미지가 선택되지 않았습니다.</string>
+    <string name="activity_compare_network_error">서버가 원할하지 않습니다.</string>
+    <string name="activity_compare_no_data">일치하는 결과가 없습니다.</string>
+    <string name="activity_compare_info_text">찍은 사물과 유사한 이미지를 선택해 주세요</string>
 
 
 </resources>

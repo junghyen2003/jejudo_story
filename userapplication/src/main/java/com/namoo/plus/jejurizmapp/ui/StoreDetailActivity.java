@@ -1,9 +1,11 @@
 package com.namoo.plus.jejurizmapp.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,6 +23,7 @@ import com.namoo.plus.jejurizmapp.network.service.ImageService;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Response;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -54,17 +57,34 @@ public class StoreDetailActivity extends AppCompatActivity {
         getImageDetail(simStore);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent i = new Intent(StoreDetailActivity.this, MainActivity.class);
+        startActivity(i);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void getImageDetail(StoreModel simStore) {
         ImageService imageService = ServiceBuilder.createService(ImageService.class, Constants.NAMOO_PLUS_BASE_URL);
 
         imageService.getStoreForId(simStore.getId())
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<StoreDetailResponse>() {
+                .subscribe(new Subscriber<Response<StoreDetailResponse>>() {
 
                     @Override
                     public void onCompleted() {
-                        Log.i("HS", "onCompleted");
+                        mProgressBar.setVisibility(View.GONE);
                     }
 
                     @Override
@@ -73,22 +93,28 @@ public class StoreDetailActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onNext(StoreDetailResponse storeDetailResponse) {
-                        mStore = storeDetailResponse.getData();
-
+                    public void onNext(Response<StoreDetailResponse> response) {
+                        if (response.isSuccessful()) {
+                            if (response.code() == 200) {
+                                mStore = response.body().getData();
+                                if (mStore != null) {
+                                    Glide.with(StoreDetailActivity.this)
+                                            .load(mStore.getMainImage())
+                                            .into(mIvMainImage);
+                                    mTxContent.setText(mStore.getSummary());
+                                }
+                            } else if (response.code() == 204) {
+                                Toast.makeText(StoreDetailActivity.this, R.string.activity_compare_no_data, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.i("HS", "error : " + response.code() + ":" + response.message());
+                                Toast.makeText(StoreDetailActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.i("HS", "error : " + response.code() + ":" + response.message());
+                            Toast.makeText(StoreDetailActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
     }
 
-    private void settingData() {
-        if (mStore != null) {
-            Glide.with(this)
-                    .load(mStore.getMainImage())
-                    .into(mIvMainImage);
-            mTxContent.setText(mStore.getSummary());
-        } else {
-            Toast.makeText(this, "데이터 호출 실패 ", Toast.LENGTH_SHORT).show();
-        }
-        mProgressBar.setVisibility(View.GONE);
-    }
 }

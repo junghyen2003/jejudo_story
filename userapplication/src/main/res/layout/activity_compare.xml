@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="여기 메세지 나오는 공간" />
+            android:text="@string/activity_compare_info_text" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -25,7 +25,7 @@
                 android:id="@+id/activity_compare_check"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@mipmap/ic_launcher"
+                android:background="@drawable/ic_send_black_24dp"
                 android:layout_alignParentRight="true" />
 
             <android.support.v7.widget.RecyclerView
@@ -44,7 +44,9 @@
         android:id="@+id/activity_compare_main_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/activity_compare_top_layout"/>
+        android:scaleType="centerCrop"
+        android:layout_above="@id/activity_compare_top_layout"
+        android:layout_alignParentTop="true" />
 
     <ProgressBar
         android:id="@+id/activity_compare_progressbar"

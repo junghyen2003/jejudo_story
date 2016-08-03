@@ -21,9 +21,9 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_camera_enhance_white_24dp" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <RelativeLayout
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_margin="10dp"
@@ -33,20 +33,22 @@
             android:id="@+id/activity_camera_gps_image"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
             android:background="@drawable/round_bg"
             android:padding="15dp"
-            android:src="@drawable/ic_flash_off_white_24dp" />
+            android:src="@drawable/ic_location_off_white_24dp" />
 
         <ImageView
             android:id="@+id/activity_camera_flash_image"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_alignParentRight="true"
             android:background="@drawable/round_bg"
             android:padding="15dp"
             android:src="@drawable/ic_flash_off_white_24dp" />
 
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <!--오른쪽 벽 -->
     <LinearLayout
@@ -87,5 +89,9 @@
         android:background="@color/activity_camera_wall_color"
         android:orientation="vertical" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/activity_camera_log_text"/>
 
 </RelativeLayout>

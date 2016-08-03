@@ -6,10 +6,12 @@
     <ImageView
         android:id="@+id/activity_store_detail_main_image"
         android:layout_width="match_parent"
-        android:layout_height="300dp" />
+        android:layout_height="300dp"
+        android:scaleType="centerCrop"/>
 
     <TextView
         android:id="@+id/activity_store_detail_content"
+        android:layout_below="@id/activity_store_detail_main_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
