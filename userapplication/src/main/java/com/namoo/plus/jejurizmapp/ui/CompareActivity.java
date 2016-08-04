@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -36,7 +35,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -59,8 +57,8 @@ public class CompareActivity extends AppCompatActivity {
     @BindView(R.id.activity_compare_progressbar)
     public ProgressBar mProgressBar;
 
-    @BindView(R.id.activity_compare_check)
-    public ImageView mIvNextCheck;
+    //@BindView(R.id.activity_compare_check)
+    //public ImageView mIvNextCheck;
 
     private ImageAdapater mAdapter;
     private List<StoreModel> storeList = new ArrayList<>();
@@ -83,7 +81,7 @@ public class CompareActivity extends AppCompatActivity {
 
     }
 
-    @OnClick(R.id.activity_compare_check)
+    /*@OnClick(R.id.activity_compare_check)
     public void onClickNextCheck() {
         if (mSelectedItem == -1) {
             Toast.makeText(CompareActivity.this, R.string.activity_compare_no_selected_image, Toast.LENGTH_SHORT).show();
@@ -93,7 +91,7 @@ public class CompareActivity extends AppCompatActivity {
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
         }
-    }
+    }*/
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -184,7 +182,7 @@ public class CompareActivity extends AppCompatActivity {
 
             Glide.with(getContext())
                     .load(store.getMainImage())
-                    .override(100,100)
+                    .override(100, 100)
                     .dontAnimate()
                     .centerCrop()
                     .into(holder.mImage);
@@ -209,9 +207,9 @@ public class CompareActivity extends AppCompatActivity {
                 super(itemView);
                 itemView.setOnClickListener(this);
                 mImage = (ImageView) itemView.findViewById(R.id.listitem_recycle_image);
-                mCheckBox = (CheckBox) itemView.findViewById(R.id.listitem_recycle_checkbox);
+                //mCheckBox = (CheckBox) itemView.findViewById(R.id.listitem_recycle_checkbox);
 
-                mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                /*mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                         if (isChecked) {
@@ -220,19 +218,24 @@ public class CompareActivity extends AppCompatActivity {
                             mSelectedItem = -1;
                         }
                     }
-                });
+                });*/
 
             }
 
             @Override
             public void onClick(View view) {
-                if (mCheckBox.isChecked()) {
+                mSelectedItem = getAdapterPosition();
+                Intent i = new Intent(CompareActivity.this, StoreDetailActivity.class);
+                i.putExtra("data", storeList.get(mSelectedItem));
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(i);
+                /*if (mCheckBox.isChecked()) {
                     mSelectedItem = -1;
                     mCheckBox.setChecked(false);
                 } else {
                     mSelectedItem = getAdapterPosition();
                     mCheckBox.setChecked(true);
-                }
+                }*/
             }
         }
     }
