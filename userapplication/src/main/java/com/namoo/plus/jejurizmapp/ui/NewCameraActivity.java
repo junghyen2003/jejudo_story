@@ -188,8 +188,10 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 exifi.saveAttributes();
             }
 
-            //ImageInfoModel imageInfo = new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue
-            //, mCompassValue, mOrientation);
+            ImageInfoModel imageInfo = new ImageInfoModel(path, mCurrentLat, mCurrentLon, mLightValue
+            , mCompassValue, mOrientation);
+            //ImageInfoModel imageInfo = new ImageInfoModel(path, 37.5665350, 126.9779690, mLightValue
+              //      , mCompassValue, mOrientation);
 
             Log.i("HS","최종 사진 데이터 ");
             Log.i("HS","위도 경도 : " + mCurrentLat + "/" + mCurrentLon);
@@ -197,8 +199,6 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
             Log.i("HS","방향 : " + mCompassValue);
             Log.i("HS","방향 : " + mOrientation);
 
-            ImageInfoModel imageInfo = new ImageInfoModel(path, 37.5665350, 126.9779690, mLightValue
-                    , mCompassValue, mOrientation);
 
             Intent i = new Intent(this, CompareActivity.class);
             i.putExtra("data", imageInfo);
@@ -301,6 +301,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
             public void run() {
                 mLightValue = mLightInfo.getmLightValue();
                 mCompassValue = mCompass.getDirection();
+
 
                 float current = mCompass.getAzimuth();
 
