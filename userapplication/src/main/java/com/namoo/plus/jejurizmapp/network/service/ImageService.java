@@ -16,6 +16,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 public interface ImageService {
@@ -23,6 +24,7 @@ public interface ImageService {
     @Multipart
     @POST("/api/v1/stores")
     Observable<Response<StoreListResponse>> getSearchImageData(
+            @Query("more") String more,
             @Part("lat") RequestBody lat,
             @Part("lng") RequestBody lng,
             @Part("illum") RequestBody illum,

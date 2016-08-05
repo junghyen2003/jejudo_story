@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.activity_main_menu_restaurant)
     public void clickRestaurant() {
-        Intent i = new Intent(this, SearchRestaurantActivity.class);
-        startActivity(i);
+        //Intent i = new Intent(this, SearchRestaurantActivity.class);
+        //startActivity(i);
     }
     @OnClick(R.id.activity_main_menu_tour)
     public void clickTour() {

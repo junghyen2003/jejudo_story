@@ -35,6 +35,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -57,12 +58,16 @@ public class CompareActivity extends AppCompatActivity {
     @BindView(R.id.activity_compare_progressbar)
     public ProgressBar mProgressBar;
 
-    //@BindView(R.id.activity_compare_check)
-    //public ImageView mIvNextCheck;
+    @BindView(R.id.activity_compare_more)
+    public ImageView mIvMoreData;
 
     private ImageAdapater mAdapter;
     private List<StoreModel> storeList = new ArrayList<>();
     private int mSelectedItem = -1;
+
+    private ImageInfoModel imageInfoModel;
+    private boolean isMore  = false;
+    private boolean isRequest = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,26 +77,25 @@ public class CompareActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.activity_compare_title);
 
-        ImageInfoModel imageInfoModel = getIntent().getParcelableExtra("data");
+        imageInfoModel = getIntent().getParcelableExtra("data");
         mIvMainImage.setImageBitmap(Utils.decodeSampledBitmapFromResource(imageInfoModel.getFilePath(), 4));
-        getSearchImage(imageInfoModel);
+        getSearchImage(imageInfoModel, false);
 
         setRecycler();
         //TODO The application may be doing too much work on its main thread. 어디서 나는거지!?!?
 
     }
 
-    /*@OnClick(R.id.activity_compare_check)
+    @OnClick(R.id.activity_compare_more)
     public void onClickNextCheck() {
-        if (mSelectedItem == -1) {
-            Toast.makeText(CompareActivity.this, R.string.activity_compare_no_selected_image, Toast.LENGTH_SHORT).show();
-        } else {
-            Intent i = new Intent(CompareActivity.this, StoreDetailActivity.class);
-            i.putExtra("data", storeList.get(mSelectedItem));
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
+        if(!isRequest) {
+            if (!isMore) {
+                getSearchImage(imageInfoModel, true);
+                isMore = true;
+            }
         }
-    }*/
+
+    }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -117,7 +121,8 @@ public class CompareActivity extends AppCompatActivity {
     }
 
 
-    public void getSearchImage(ImageInfoModel infoModel) {
+    public void getSearchImage(ImageInfoModel infoModel, boolean more) {
+        isRequest = true;
         File imageFile = new File(infoModel.getFilePath());
 
         ImageService imageService = ServiceBuilder.createService(ImageService.class, Constants.NAMOO_PLUS_BASE_URL);
@@ -131,7 +136,13 @@ public class CompareActivity extends AppCompatActivity {
         RequestBody compass = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(infoModel.getDirection()));
         RequestBody ori = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(infoModel.getOrientation()));
 
-        imageService.getSearchImageData(lat, lng, light, compass, ori, body)
+        String moreLoading = null;
+
+        if(more) {
+            moreLoading = "true";
+        }
+
+        imageService.getSearchImageData(moreLoading, lat, lng, light, compass, ori, body)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Response<StoreListResponse>>() {
@@ -156,6 +167,7 @@ public class CompareActivity extends AppCompatActivity {
 
                     @Override
                     public void onCompleted() {
+                        isRequest = false;
                         mProgressBar.setVisibility(View.GONE);
                     }
 

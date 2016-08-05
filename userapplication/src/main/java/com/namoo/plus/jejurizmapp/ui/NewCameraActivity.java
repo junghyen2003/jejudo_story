@@ -129,6 +129,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     private String mFlashMode = FLASH_MODE_OFF;
     private boolean mGpsMode = false;
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
