@@ -23,7 +23,7 @@ public class Constants {
     //이미지는 jpg 사용
     public static final String IMAGE_STRING_FORMAT = ".jpg";
 
-    public static final String NAMOO_PLUS_BASE_URL = "http://220.69.209.34";
+    public static final String NAMOO_PLUS_BASE_URL = "http://211.225.79.43";
 
     public static final int STANDARD_WIDTH_SIZE = 1920;
     public static final int STANDARD_HEIGHT_SIZE = 1080;

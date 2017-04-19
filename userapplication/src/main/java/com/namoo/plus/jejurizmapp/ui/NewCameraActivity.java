@@ -136,6 +136,12 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         setContentView(R.layout.activity_camera);
         ButterKnife.bind(this);
 
+        // 관광지 선택 시 틀 없애기
+        Intent i = getIntent();
+        if(i.getExtras().getString("menu").equals("museum")) {
+            mPreviewView.setBackgroundResource(android.R.color.transparent);
+        }
+
         //가로세로 변환시에 데이터 들고오기
         if (savedInstanceState != null) {
             mImageList = savedInstanceState.getParcelableArrayList(IMAGE_SAVE_DATA);
@@ -414,10 +420,10 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     public void flashClick(View v) {
         if (mFlashMode.equals(FLASH_MODE_OFF)) {
             mFlashMode = FLASH_MODE_ON;
-            mBtnFlash.setImageResource(R.drawable.ic_flash_on_white_24dp);
+            mBtnFlash.setBackgroundResource(R.drawable.ic_falsh_on_white_24dp);
         } else {
             mFlashMode = FLASH_MODE_OFF;
-            mBtnFlash.setImageResource(R.drawable.ic_flash_off_white_24dp);
+            mBtnFlash.setBackgroundResource(R.drawable.ic_flash_off_white_24dp);
         }
         setFlashMode();
     }
@@ -426,10 +432,10 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     public void gpsClick(View v) {
         if (mGpsMode) {
             mGpsMode = false;
-            mBtnGps.setImageResource(R.drawable.ic_location_off_white_24dp);
+            mBtnGps.setBackgroundResource(R.drawable.ic_location_off_white_24dp);
         } else {
             mGpsMode = true;
-            mBtnGps.setImageResource(R.drawable.ic_location_on_white_24dp);
+            mBtnGps.setBackgroundResource(R.drawable.ic_location_on_white_24dp);
         }
         gpsUpdate();
 

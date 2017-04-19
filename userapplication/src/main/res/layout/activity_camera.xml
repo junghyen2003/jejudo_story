@@ -7,7 +7,8 @@
     <com.namoo.plus.jejurizmapp.ui.view.SquareCameraPreview
         android:id="@+id/activity_camera_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@drawable/camera_bg" />
 
     <ImageButton
         android:id="@+id/activity_camera_take_button"
@@ -16,14 +17,13 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_margin="10dp"
-        android:background="@drawable/round_bg"
+        android:background="@drawable/ic_camera_enhance_white_24dp"
         android:padding="15dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_camera_enhance_white_24dp" />
+        android:scaleType="fitCenter" />
 
     <RelativeLayout
         android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_margin="10dp"
@@ -34,60 +34,19 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_alignParentLeft="true"
-            android:background="@drawable/round_bg"
-            android:padding="15dp"
-            android:src="@drawable/ic_location_off_white_24dp" />
+            android:background="@drawable/ic_location_off_white_24dp"
+            android:padding="15dp" />
 
         <ImageView
             android:id="@+id/activity_camera_flash_image"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_alignParentRight="true"
-            android:background="@drawable/round_bg"
-            android:padding="15dp"
-            android:src="@drawable/ic_flash_off_white_24dp" />
+            android:background="@drawable/ic_flash_off_white_24dp"
+            android:padding="15dp" />
 
 
     </RelativeLayout>
-
-    <!--오른쪽 벽 -->
-    <LinearLayout
-        android:id="@+id/activity_camera_wall_right"
-        android:layout_width="@dimen/black_screen_horizontal_space"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:background="@color/activity_camera_wall_color"
-        android:orientation="vertical" />
-
-    <!--왼쪽쪽 벽 -->
-    <LinearLayout
-        android:id="@+id/activity_camera_wall_left"
-        android:layout_width="@dimen/black_screen_horizontal_space"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:background="@color/activity_camera_wall_color"
-        android:orientation="vertical" />
-
-    <!--상단쪽 벽 -->
-    <LinearLayout
-        android:id="@+id/activity_camera_wall_top"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/black_screen_vertical_space"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="@dimen/black_screen_horizontal_space"
-        android:layout_marginRight="@dimen/black_screen_horizontal_space"
-        android:background="@color/activity_camera_wall_color"
-        android:orientation="vertical" />
-    <!--상단쪽 벽 -->
-    <LinearLayout
-        android:id="@+id/activity_camera_wall_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/black_screen_vertical_space"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="@dimen/black_screen_horizontal_space"
-        android:layout_marginRight="@dimen/black_screen_horizontal_space"
-        android:background="@color/activity_camera_wall_color"
-        android:orientation="vertical" />
 
     <TextView
         android:layout_width="wrap_content"

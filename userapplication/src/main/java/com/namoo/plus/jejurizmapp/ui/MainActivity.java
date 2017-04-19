@@ -3,7 +3,7 @@ package com.namoo.plus.jejurizmapp.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 
 import com.namoo.plus.jejurizmapp.R;
 import com.namoo.plus.jejurizmapp.common.JPreference;
@@ -15,20 +15,11 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.activity_main_menu_camera)
-    public LinearLayout mMenuCamera;
+    @BindView(R.id.restraurant_imageview)
+    public ImageView mRestraurant_imageView;
 
-    @BindView(R.id.activity_main_menu_restaurant)
-    public LinearLayout mMenuRestaurant;
-
-    @BindView(R.id.activity_main_menu_tour)
-    public LinearLayout mMenuTour;
-
-    @BindView(R.id.activity_main_menu_shopping)
-    public LinearLayout mMenuShopping;
-
-    @BindView(R.id.activity_main_menu_restroom)
-    public LinearLayout mMenuRestRoom;
+    @BindView(R.id.museum_imageview)
+    public ImageView mMuseum_imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,26 +34,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.activity_main_menu_restaurant)
-    public void clickRestaurant() {
-        //Intent i = new Intent(this, SearchRestaurantActivity.class);
-        //startActivity(i);
-    }
-    @OnClick(R.id.activity_main_menu_tour)
-    public void clickTour() {
-
-    }
-    @OnClick(R.id.activity_main_menu_shopping)
-    public void clickShopping() {
-
-    }
-    @OnClick(R.id.activity_main_menu_restroom)
-    public void clickRestroom() {
-
-    }
-    @OnClick(R.id.activity_main_menu_camera)
+    @OnClick(R.id.restraurant_imageview)
     public void clickCamera() {
         Intent i = new Intent(this, NewCameraActivity.class);
+        i.putExtra("menu","restraurant");
+        startActivity(i);
+    }
+    @OnClick(R.id.museum_imageview)
+    public void clickCamera2(){
+        Intent i = new Intent(this, NewCameraActivity.class);
+        i.putExtra("menu","museum");
         startActivity(i);
     }
 

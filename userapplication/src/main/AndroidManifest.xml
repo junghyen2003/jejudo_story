@@ -16,11 +16,14 @@
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.IntroActivity"
+        <activity
+            android:name=".ui.IntroActivity"
             android:theme="@style/NoActionAppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,12 +31,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.NewCameraActivity"
-            android:theme="@style/NoActionAppTheme"/>
+        <activity
+            android:name=".ui.NewCameraActivity"
+            android:theme="@style/NoActionAppTheme" />
         <activity android:name=".ui.MainActivity" />
         <activity android:name=".ui.SearchRestaurantActivity" />
-        <activity android:name=".ui.CompareActivity"/>
-        <activity android:name=".ui.StoreDetailActivity"/>
+        <activity android:name=".ui.CompareActivity" />
+        <activity android:name=".ui.StoreDetailActivity" />
+        <activity android:name=".ui.BulkActivity"></activity>
     </application>
 
 </manifest>

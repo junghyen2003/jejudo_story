@@ -21,7 +21,8 @@ public class StoreModel implements Parcelable {
         readFromParcel(source);
     }
 
-    public StoreModel(int id, String name, String mainImage) {
+    // 중현 수정
+    public StoreModel(int id, String name, String mainImage, String addr, Boolean toiletSharedInside) {
         this.id = id;
         this.name = name;
         this.mainImage = mainImage;
@@ -32,6 +33,7 @@ public class StoreModel implements Parcelable {
         return 0;
     }
 
+    // 중현 수정
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
@@ -39,6 +41,7 @@ public class StoreModel implements Parcelable {
         dest.writeString(mainImage);
     }
 
+    // 중현 수정
     private void readFromParcel(Parcel source) {
         id = source.readInt();
         name = source.readString();
@@ -80,4 +83,5 @@ public class StoreModel implements Parcelable {
     public void setMainImage(String mainImage) {
         this.mainImage = mainImage;
     }
+
 }

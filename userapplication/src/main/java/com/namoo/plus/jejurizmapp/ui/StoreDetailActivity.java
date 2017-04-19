@@ -54,6 +54,34 @@ public class StoreDetailActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(simStore.getName());
 
+        // 중현 인터셉트! -> bulkActivity로 넘김(보여주기)
+        if(simStore.getName().equals("가락국수(粗面条)")){
+            Intent i = new Intent(StoreDetailActivity.this, BulkActivity.class);
+            i.putExtra("name", simStore.getName());
+            startActivity(i);
+            finish();
+        } else if(simStore.getName().equals("대관령아구찜조개구이(大关岭辣炖安康鱼烤蛤蜊)")){
+            Intent i = new Intent(StoreDetailActivity.this, BulkActivity.class);
+            i.putExtra("name", simStore.getName());
+            startActivity(i);
+            finish();
+        } else if(simStore.getName().equals("제원칼집")) {
+            Intent i = new Intent(StoreDetailActivity.this, BulkActivity.class);
+            i.putExtra("name", simStore.getName());
+            startActivity(i);
+            finish();
+        } else if(simStore.getName().equals("냄비에퐁닭（乓锅鸡）")) {
+            Intent i = new Intent(StoreDetailActivity.this, BulkActivity.class);
+            i.putExtra("name", simStore.getName());
+            startActivity(i);
+            finish();
+        } else if(simStore.getName().equals("로당(炉堂)(本店)")) {
+            Intent i = new Intent(StoreDetailActivity.this, BulkActivity.class);
+            i.putExtra("name", simStore.getName());
+            startActivity(i);
+            finish();
+        }
+
         getImageDetail(simStore);
     }
 
