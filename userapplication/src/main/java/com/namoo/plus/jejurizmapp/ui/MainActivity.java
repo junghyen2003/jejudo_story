@@ -6,8 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
 import com.namoo.plus.jejurizmapp.R;
-import com.namoo.plus.jejurizmapp.common.JPreference;
-import com.namoo.plus.jejurizmapp.ui.dialog.ExplanationDialog;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,10 +26,6 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
         getSupportActionBar().setTitle(R.string.activity_intro_main_title);
-
-        if(!JPreference.getInstance(this).getReadExplanation()) {
-            new ExplanationDialog().show(getSupportFragmentManager(), "");
-        }
     }
 
     @OnClick(R.id.restraurant_imageview)
@@ -40,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         i.putExtra("menu","restraurant");
         startActivity(i);
     }
+
     @OnClick(R.id.museum_imageview)
     public void clickCamera2(){
         Intent i = new Intent(this, NewCameraActivity.class);
@@ -48,3 +43,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+

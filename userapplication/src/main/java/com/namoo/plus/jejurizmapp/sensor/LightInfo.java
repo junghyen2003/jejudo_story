@@ -12,7 +12,7 @@ import java.text.DecimalFormat;
  * Created by HeungSun-AndBut on 2016. 6. 9..
  */
 
-//TODO 추후에 나침반, GSP, 조도 값 3가지 모두 한 클래스로 통합 관리
+//TODO 추후에 나침반, GPS, 조도 값 3가지 모두 한 클래스로 통합 관리
 public class LightInfo implements SensorEventListener {
 
     private SensorManager mSensorManager;

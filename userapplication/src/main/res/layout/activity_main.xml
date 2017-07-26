@@ -7,34 +7,37 @@
     android:orientation="vertical"
     tools:context="com.namoo.plus.jejurizmapp.ui.MainActivity">
 
-    <LinearLayout
-        android:id="@+id/activity_main_menu_camera"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@drawable/main2_bg"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:weightSum="1">
+        android:layout_height="match_parent"
+        android:background="@drawable/main2_bg">
 
-        <ImageView
-            android:id="@+id/restraurant_imageview"
-            android:layout_width="230dp"
-            android:layout_height="230dp"
-            android:src="@drawable/ic_camera_alt_white_24dp" />
+        <LinearLayout
+            android:id="@+id/activity_main_menu_camera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:weightSum="1">
 
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="300dp"
-            android:layout_height="85dp"
-            app:srcCompat="@drawable/main2_bg_click" />
+            <ImageView
+                android:id="@+id/restraurant_imageview"
+                android:layout_width="210dp"
+                android:layout_height="215dp"
+                android:src="@drawable/ic_camera_alt_white_24dp" />
 
-        <ImageView
-            android:id="@+id/museum_imageview"
-            android:layout_width="230dp"
-            android:layout_height="230dp"
-            app:srcCompat="@drawable/main2_bt_museum" />
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="300dp"
+                android:layout_height="80dp"
+                app:srcCompat="@drawable/main2_bg_click" />
 
-    </LinearLayout>
-
+            <ImageView
+                android:id="@+id/museum_imageview"
+                android:layout_width="210dp"
+                android:layout_height="215dp"
+                app:srcCompat="@drawable/main2_bt_museum" />
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

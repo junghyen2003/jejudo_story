@@ -38,7 +38,8 @@
         <activity android:name=".ui.SearchRestaurantActivity" />
         <activity android:name=".ui.CompareActivity" />
         <activity android:name=".ui.StoreDetailActivity" />
-        <activity android:name=".ui.BulkActivity"></activity>
+        <activity android:name=".ui.MuseumCompareActivity" />
+        <activity android:name=".ui.MuseumDetailActivity" />
     </application>
 
 </manifest>

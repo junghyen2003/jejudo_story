@@ -15,5 +15,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style
+        name="StoreBigRatingBar"
+        parent="@android:style/Widget.RatingBar">
+        <item
+            name="android:progressDrawable">@drawable/rating_bar</item>
+    </style>
 
 </resources>

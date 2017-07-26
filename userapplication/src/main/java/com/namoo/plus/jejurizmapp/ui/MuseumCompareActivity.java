@@ -22,9 +22,9 @@ import com.namoo.plus.jejurizmapp.R;
 import com.namoo.plus.jejurizmapp.common.Constants;
 import com.namoo.plus.jejurizmapp.common.Utils;
 import com.namoo.plus.jejurizmapp.model.ImageInfoModel;
-import com.namoo.plus.jejurizmapp.model.StoreModel;
+import com.namoo.plus.jejurizmapp.model.MuseumModel;
 import com.namoo.plus.jejurizmapp.network.ServiceBuilder;
-import com.namoo.plus.jejurizmapp.network.model.StoreListResponse;
+import com.namoo.plus.jejurizmapp.network.model.MuseumListResponse;
 import com.namoo.plus.jejurizmapp.network.service.ImageService;
 import com.namoo.plus.jejurizmapp.ui.view.BaseRecyclerViewAdapter;
 import com.namoo.plus.jejurizmapp.ui.view.SpacesItemDecoration;
@@ -45,24 +45,26 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 /**
- * Created by HeungSun-AndBut on 2016. 7. 29..
+ * Created by jungh on 2017-05-18.
  */
-public class CompareActivity extends AppCompatActivity {
 
-    @BindView(R.id.activity_compare_main_image)
+public class MuseumCompareActivity extends AppCompatActivity {
+
+    @BindView(R.id.activity_compare_museum_main_image)
     public ImageView mIvMainImage;
 
-    @BindView(R.id.activity_compare_image_list)
+    @BindView(R.id.activity_compare_museum_image_list)
     public RecyclerView mRvHorizonList;
 
-    @BindView(R.id.activity_compare_progressbar)
+    @BindView(R.id.activity_compare_museum_progressbar)
     public ProgressBar mProgressBar;
 
-    @BindView(R.id.activity_compare_more)
+    @BindView(R.id.activity_compare_museum_more)
     public ImageView mIvMoreData;
 
     private ImageAdapater mAdapter;
-    private List<StoreModel> storeList = new ArrayList<>();
+    private List<MuseumModel> museumList = new ArrayList<>();
+
     private int mSelectedItem = -1;
 
     private ImageInfoModel imageInfoModel;
@@ -72,7 +74,7 @@ public class CompareActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_compare);
+        setContentView(R.layout.activity_compare_museum);
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.activity_compare_title);
@@ -88,7 +90,7 @@ public class CompareActivity extends AppCompatActivity {
     }
 
 
-    @OnClick(R.id.activity_compare_more)
+    @OnClick(R.id.activity_compare_museum_more)
     public void onClickNextCheck() {
         if(!isRequest) {
             if (!isMore) {
@@ -116,10 +118,10 @@ public class CompareActivity extends AppCompatActivity {
 
         mRvHorizonList.setLayoutManager(mLayoutManager_Linear);
         mRvHorizonList.addItemDecoration(new SpacesItemDecoration(
-                Utils.dpToPx(CompareActivity.this, 5), SpacesItemDecoration.TYPE_HORIZONTAL));
+                Utils.dpToPx(MuseumCompareActivity.this, 5), SpacesItemDecoration.TYPE_HORIZONTAL));
         mRvHorizonList.setHasFixedSize(true);
 
-        mAdapter = new ImageAdapater(CompareActivity.this, storeList);
+        mAdapter = new ImageAdapater(MuseumCompareActivity.this, museumList);
         mRvHorizonList.setAdapter(mAdapter);
     }
 
@@ -145,26 +147,29 @@ public class CompareActivity extends AppCompatActivity {
             moreLoading = "true";
         }
 
-        imageService.getSearchImageData(moreLoading, lat, lng, light, compass, ori, body)
+        imageService.getMuseumSearchImageData(moreLoading, lat, lng, light, compass, ori, body)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Response<StoreListResponse>>() {
+                .subscribe(new Subscriber<Response<MuseumListResponse>>() {
                     @Override
-                    public void onNext(Response<StoreListResponse> response) {
+                    public void onNext(Response<MuseumListResponse> response) {
                         if (response.isSuccessful()) {
                             if (response.code() == 200) {
+                                //storeList = response.body().getData();
                                 mAdapter.addItems(response.body().getData());
+                                //mAdapter.notifyDataSetChanged();
                             } else if (response.code() == 204) {
-                                Toast.makeText(CompareActivity.this, R.string.activity_compare_no_data, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MuseumCompareActivity.this, R.string.activity_compare_no_data, Toast.LENGTH_SHORT).show();
                             } else {
                                 Log.i("HS", "error : " + response.code() + ":" + response.message());
-                                Toast.makeText(CompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MuseumCompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Log.i("HS", "error : " + response.code() + ":" + response.message());
-                            Toast.makeText(CompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MuseumCompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
                         }
                     }
+
                     @Override
                     public void onCompleted() {
                         isRequest = false;
@@ -175,25 +180,26 @@ public class CompareActivity extends AppCompatActivity {
                     @Override
                     public void onError(Throwable e) {
                         Log.i("HS", "error : " + e.getMessage());
-                        Toast.makeText(CompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MuseumCompareActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
                     }
+
                 });
     }
 
-    public class ImageAdapater extends BaseRecyclerViewAdapter<StoreModel, ImageAdapater.SelectedPhotoHolder> {
+    public class ImageAdapater extends BaseRecyclerViewAdapter<MuseumModel, ImageAdapater.SelectedPhotoHolder> {
 
 
-        public ImageAdapater(Activity activity, List<StoreModel> mStore) {
-            super(activity, mStore);
+        public ImageAdapater(Activity activity, List<MuseumModel> mMuseum) {
+            super(activity, mMuseum);
         }
 
         @Override
         public void onBindView(SelectedPhotoHolder holder, final int position) {
 
-            StoreModel store = getItem(position);
+            MuseumModel museum = getItem(position);
 
             Glide.with(getContext())
-                    .load(store.getMainImage())
+                    .load(museum.getMainImage())
                     .override(100, 100)
                     .dontAnimate()
                     .centerCrop()
@@ -208,6 +214,7 @@ public class CompareActivity extends AppCompatActivity {
             View view = mInflater.inflate(R.layout.listitem_recycle_list, parent, false);
             return new SelectedPhotoHolder(view);
         }
+
 
         class SelectedPhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -236,8 +243,8 @@ public class CompareActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mSelectedItem = getAdapterPosition();
-                Intent i = new Intent(CompareActivity.this, StoreDetailActivity.class);
-                i.putExtra("data", storeList.get(mSelectedItem));
+                Intent i = new Intent(MuseumCompareActivity.this, MuseumDetailActivity.class);
+                i.putExtra("data", museumList.get(mSelectedItem));
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(i);
                 /*if (mCheckBox.isChecked()) {
@@ -250,4 +257,5 @@ public class CompareActivity extends AppCompatActivity {
             }
         }
     }
+
 }

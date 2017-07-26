@@ -129,6 +129,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
     private String mFlashMode = FLASH_MODE_OFF;
     private boolean mGpsMode = false;
 
+    String compare;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -138,9 +139,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
         // 관광지 선택 시 틀 없애기
         Intent i = getIntent();
-        if(i.getExtras().getString("menu").equals("museum")) {
-            mPreviewView.setBackgroundResource(android.R.color.transparent);
-        }
+        compare = i.getExtras().getString("menu");
 
         //가로세로 변환시에 데이터 들고오기
         if (savedInstanceState != null) {
@@ -163,8 +162,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
 
         mOrientationListener = new CameraOrientationListener(this);
 
-//        imageService = ServiceBuilder.createService(ImageService.class,
-//                Constants.NAMOO_PLUS_BASE_URL);
+//        imageService = ServiceBuilder.createService(ImageService.class,Constants.NAMOO_PLUS_BASE_URL);
     }
 
 
@@ -207,10 +205,15 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
             Log.i("HS","방향 : " + mOrientation);
 
 
-            Intent i = new Intent(this, CompareActivity.class);
-            i.putExtra("data", imageInfo);
-            startActivity(i);
-
+            if(compare.equals("museum")){
+                Intent i = new Intent(this, MuseumCompareActivity.class);
+                i.putExtra("data", imageInfo);
+                startActivity(i);
+            }else {
+                Intent i = new Intent(this, CompareActivity.class);
+                i.putExtra("data", imageInfo);
+                startActivity(i);
+            }
         } catch (Exception e) {
             Log.i("HS","error : " + e.getMessage());
         }

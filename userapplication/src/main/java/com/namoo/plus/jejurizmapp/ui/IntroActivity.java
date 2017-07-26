@@ -12,9 +12,6 @@ import java.util.TimerTask;
 
 import butterknife.ButterKnife;
 
-/**
- * Created by lee on 2016. 6. 29..
- */
 public class IntroActivity extends AppCompatActivity {
 
     Timer mTimer = new Timer();
@@ -41,3 +38,4 @@ public class IntroActivity extends AppCompatActivity {
         }
     };
 }
+

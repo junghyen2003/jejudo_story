@@ -43,9 +43,7 @@ public class GpsInfo {
         locationManager = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
 
         //GPS가 사용가능한지
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
-                !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            showSettingsAlert();
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             return false;
         } else {
             return true;
