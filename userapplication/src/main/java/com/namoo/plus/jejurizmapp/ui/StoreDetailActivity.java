@@ -179,10 +179,10 @@ public class StoreDetailActivity extends AppCompatActivity {
                                     // mMenuModel => data 리스트를 가져옴 => 각각의 메뉴들이 담긴 모델
                                     mListMenuAdapter = new ListMenuAdapter(StoreDetailActivity.this, mMenuModel);
                                     mStore_listView.setAdapter(mListMenuAdapter);
-                                    mListMenuAdapter.notifyDataSetChanged();
+                                    //mListMenuAdapter.notifyDataSetChanged();
                                 }
                             } else if (response.code() == 204) {
-                                Toast.makeText(StoreDetailActivity.this, "가게 정보가 존재하지 않습니다...", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(StoreDetailActivity.this, "메뉴 정보가 존재하지 않습니다...", Toast.LENGTH_SHORT).show();
                             } else {
                                 Log.i("HS", "error : " + response.code() + ":" + response.message());
                                 Toast.makeText(StoreDetailActivity.this, R.string.activity_compare_network_error, Toast.LENGTH_SHORT).show();
