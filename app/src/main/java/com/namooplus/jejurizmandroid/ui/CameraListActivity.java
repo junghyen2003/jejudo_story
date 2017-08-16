@@ -114,7 +114,7 @@ public class CameraListActivity extends AppCompatActivity {
     }
 
     private void checkDialog() {
-        AlertDialog.Builder db = new AlertDialog.Builder(this);
+        AlertDialog.Builder db = new AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog);
         db.setTitle(R.string.activity_camera_list_dialog_delete_title)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -142,7 +142,7 @@ public class CameraListActivity extends AppCompatActivity {
         mMenu1.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                AlertDialog.Builder db = new AlertDialog.Builder(CameraListActivity.this);
+                AlertDialog.Builder db = new AlertDialog.Builder(CameraListActivity.this, R.style.Theme_AppCompat_Dialog);
                 db.setTitle(R.string.activity_camera_list_dialog_add_image_title)
                         .setMessage(R.string.activity_camera_list_dialog_add_image_text)
                         .setCancelable(true)

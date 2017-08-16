@@ -119,7 +119,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
 
     @OnClick(R.id.activity_camera_image_confirm)
     public void onClickConfirm() {
-        AlertDialog.Builder db = new AlertDialog.Builder(this);
+        AlertDialog.Builder db = new AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog);
         db.setTitle(R.string.activity_image_detail_dialog_check)
                 .setMessage(R.string.activity_image_detail_dialog_check_save)
                 .setCancelable(true)
@@ -139,7 +139,7 @@ public class ImageDetailActivity extends AppCompatActivity implements OnMapReady
 
     @OnClick(R.id.activity_camera_image_cancle)
     public void onClickCancle() {
-        AlertDialog.Builder db = new AlertDialog.Builder(this);
+        AlertDialog.Builder db = new AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog);
         db.setTitle(R.string.activity_image_detail_dialog_cancle)
                 .setMessage(R.string.activity_image_detail_dialog_cancle_remove)
                 .setCancelable(true)

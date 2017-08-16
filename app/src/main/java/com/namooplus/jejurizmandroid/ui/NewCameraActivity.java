@@ -2,6 +2,7 @@ package com.namooplus.jejurizmandroid.ui;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -16,6 +17,7 @@ import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
@@ -67,6 +69,8 @@ import static com.namooplus.jejurizmandroid.common.AppSetting.INTERVAL_MAP_REFRE
 
 public class NewCameraActivity extends AppCompatActivity implements SurfaceHolder.Callback, Camera.PictureCallback {
 
+    // 현재 GPS 사용 여부
+    boolean isGPSEnabled = false;
 
     private static final String[] ACTIVITY_CAMERA_PERMISSION = {ACCESS_FINE_LOCATION,
             Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -197,16 +201,7 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
         mOrientationListener = new CameraOrientationListener(this);
 
         //권한 확인
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                (PackageManager.PERMISSION_GRANTED != checkSelfPermission(ACCESS_FINE_LOCATION) ||
-                        (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.CAMERA)) ||
-                        (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) ||
-                        (PackageManager.PERMISSION_GRANTED != checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)))) {
-            requestPermissions(ACTIVITY_CAMERA_PERMISSION, ACCESS_PERMISSION);
-        } else {
-            mGpsInfo = new GpsInfo(this, locationListener);
-            mGpsInfo.initLocation();
-        }
+        turnGPSOn();
 
         mOrientationListener.enable();
     }
@@ -790,6 +785,37 @@ public class NewCameraActivity extends AppCompatActivity implements SurfaceHolde
                 return (1);
             }
             return (0);
+        }
+    }
+
+    private boolean turnGPSOn() {
+        String gps = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        if (!(gps.matches(".*gps.*") && gps.matches(".*network.*"))) {
+            // GPS OFF 일때 Dialog 표시
+            AlertDialog.Builder gsDialog = new AlertDialog.Builder(this, R.style.Theme_AppCompat_Dialog);
+            gsDialog.setTitle("위치 서비스 설정");
+            gsDialog.setMessage("위치 서비스 기능을 설정하셔야 서비스가 가능합니다.\n위치 서비스 기능을 설정하시겠습니까?");
+            // Dialog 뒤로가기 막기
+            gsDialog.setCancelable(false);
+            gsDialog.setPositiveButton("네", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    // GPS설정 화면으로 이동
+                    Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    intent.addCategory(Intent.CATEGORY_DEFAULT);
+                    startActivity(intent);
+                    isGPSEnabled = true;
+                }
+            })
+                    .setNegativeButton("아니요", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getApplicationContext(),"GPS를 켜고 다시 시도해 주시기 바랍니다.",Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+                    }).create().show();
+            return false;
+        } else {
+            return true;
         }
     }
 
